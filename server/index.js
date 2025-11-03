@@ -29,7 +29,7 @@ const db = require('./db');
 async function start() {
     try {
         await db.connect();
-        console.log("DB connected ✅");
+        console.log("DB connected");
 
         app.listen(PORT, () => {
             console.log(`Playlister Server running on port ${PORT}`);
