@@ -62,6 +62,7 @@ function AuthContextProvider(props) {
     }
 
     auth.getLoggedIn = async function () {
+    try {
         const response = await authRequestSender.getLoggedIn();
         if (response.status === 200) {
             authReducer({
@@ -72,7 +73,17 @@ function AuthContextProvider(props) {
                 }
             });
         }
+    } catch (err) {
+        console.error("Error checking login:", err);
+        authReducer({
+            type: AuthActionType.GET_LOGGED_IN,
+            payload: {
+                loggedIn: false,
+                user: null
+            }
+        });
     }
+    };
 
     auth.registerUser = async function(firstName, lastName, email, password, passwordVerify) {
         console.log("REGISTERING USER");
