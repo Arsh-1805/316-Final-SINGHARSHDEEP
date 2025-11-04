@@ -17,26 +17,35 @@ async function fetchJSON(url, options = {}) {
   return { status: res.status, data };
 }
 
+// 1) these two really are /api/...
 export const getPlaylistPairs = () =>
-  fetchJSON(`${API_BASE}/api/playlistpairs`, { method: "GET" });
+  fetchJSON(`${API_BASE}/api/playlistpairs`, {
+    method: "GET",
+  });
 
 export const getPlaylistById = (id) =>
-  fetchJSON(`${API_BASE}/api/playlist/${id}`, { method: "GET" });
+  fetchJSON(`${API_BASE}/api/playlist/${id}`, {
+    method: "GET",
+  });
 
-export const createPlaylist = (name, songs, ownerEmail) =>
-  fetchJSON(`${API_BASE}/api/playlist`, {
+export const createPlaylist = (name, songs = [], ownerEmail) =>
+  fetchJSON(`${API_BASE}/store/playlist`, {
     method: "POST",
-    body: JSON.stringify({ name, songs, ownerEmail }),
+    body: JSON.stringify({
+      name,
+      ownerEmail,
+      songs,
+    }),
   });
 
 export const updatePlaylistById = (id, playlist) =>
-  fetchJSON(`${API_BASE}/api/playlist/${id}`, {
+  fetchJSON(`${API_BASE}/store/playlist/${id}`, {
     method: "PUT",
     body: JSON.stringify({ playlist }),
   });
 
 export const deletePlaylistById = (id) =>
-  fetchJSON(`${API_BASE}/api/playlist/${id}`, {
+  fetchJSON(`${API_BASE}/store/playlist/${id}`, {
     method: "DELETE",
   });
 
@@ -45,7 +54,7 @@ const apis = {
   getPlaylistById,
   createPlaylist,
   updatePlaylistById,
-  deletePlaylistById, 
+  deletePlaylistById,
 };
 
 export default apis;

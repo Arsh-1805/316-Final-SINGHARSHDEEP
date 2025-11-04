@@ -280,26 +280,39 @@ function GlobalStoreContextProvider(props) {
     }
 
     // THIS FUNCTION CREATES A NEW LIST
-    store.createNewList = async function () {
-        let newListName = "Untitled" + store.newListCounter;
-        const response = await storeRequestSender.createPlaylist(newListName, [], auth.user.email);
-        console.log("createNewList response: " + response);
-        if (response.status === 201) {
-            tps.clearAllTransactions();
-            let newList = response.data.playlist;
-            storeReducer({
-                type: GlobalStoreActionType.CREATE_NEW_LIST,
-                payload: newList
-            }
-            );
-
-            // IF IT'S A VALID LIST THEN LET'S START EDITING IT
-            history.push("/playlist/" + newList._id);
-        }
-        else {
-            console.log("FAILED TO CREATE A NEW LIST");
-        }
+store.createNewList = async function () {
+    // 1. make sure we actually have a logged-in user
+    if (!auth.user || !auth.user.email) {
+        console.error("No logged-in user, cannot create playlist.");
+        return;
     }
+
+    // 2. build the name the same way you had it
+    let newListName = "Untitled" + store.newListCounter;
+
+    // 3. call the request with the 3 params your store expects
+    const response = await storeRequestSender.createPlaylist(
+        newListName,
+        [],                  // empty songs array to start
+        auth.user.email      // owner
+    );
+
+    console.log("createNewList response:", response);
+
+    if (response.status === 201 && response.data && response.data.playlist) {
+        tps.clearAllTransactions();
+        let newList = response.data.playlist;
+
+        storeReducer({
+            type: GlobalStoreActionType.CREATE_NEW_LIST,
+            payload: newList
+        });
+        history.push("/playlist/" + newList._id);
+    }
+    else {
+        console.log("FAILED TO CREATE A NEW LIST");
+    }
+};
 
     // THIS FUNCTION LOADS ALL THE ID, NAME PAIRS SO WE CAN LIST ALL THE LISTS
     store.loadIdNamePairs = function () {
