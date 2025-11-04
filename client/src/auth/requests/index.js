@@ -1,8 +1,4 @@
-/*
- * Auth HTTP API using Fetch (axios-like return shape)
- */
-
-const API_BASE_URL = "http://localhost:4000/auth";
+const API_BASE = "http://localhost:4000";
 
 async function fetchJSON(url, options = {}) {
   const res = await fetch(url, {
@@ -10,30 +6,21 @@ async function fetchJSON(url, options = {}) {
     headers: { "Content-Type": "application/json" },
     ...options,
   });
-  const data = await res.json();
-  return { data, status: res.status };
+
+  let data = null;
+  try {
+    data = await res.json();
+  } catch (e) {
+    data = null;
+  }
+  return { status: res.status, data };
 }
 
 export const getLoggedIn = () =>
-  fetchJSON(`${API_BASE_URL}/loggedIn`, { method: "GET" });
+  fetchJSON(`${API_BASE}/auth/loggedIn`, { method: "GET" });
 
-export const loginUser = (email, password) =>
-  fetchJSON(`${API_BASE_URL}/login`, {
-    method: "POST",
-    body: JSON.stringify({ email, password }),
-  });
-
-export const logoutUser = () =>
-  fetchJSON(`${API_BASE_URL}/logout`, { method: "GET" });
-
-export const registerUser = (
-  firstName,
-  lastName,
-  email,
-  password,
-  passwordVerify
-) =>
-  fetchJSON(`${API_BASE_URL}/register`, {
+export const registerUser = (firstName, lastName, email, password, passwordVerify) =>
+  fetchJSON(`${API_BASE}/auth/register`, {
     method: "POST",
     body: JSON.stringify({
       firstName,
@@ -44,5 +31,22 @@ export const registerUser = (
     }),
   });
 
-const apis = { getLoggedIn, registerUser, loginUser, logoutUser };
+export const loginUser = (email, password) =>
+  fetchJSON(`${API_BASE}/auth/login`, {
+    method: "POST",
+    body: JSON.stringify({ email, password }),
+  });
+
+export const logoutUser = () =>
+  fetchJSON(`${API_BASE}/auth/logout`, {
+    method: "POST",
+  });
+
+const apis = {
+  getLoggedIn,
+  registerUser,
+  loginUser,
+  logoutUser,
+};
+
 export default apis;
