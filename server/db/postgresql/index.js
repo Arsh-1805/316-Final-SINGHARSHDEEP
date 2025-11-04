@@ -40,7 +40,7 @@ class PostgresDatabaseManager extends DatabaseManager {
       },
     });
 
-    await this.sequelize.sync();
+    await this.sequelize.sync({alter: true});
     console.log("[DB] Connected to PostgreSQL");
   }
 
