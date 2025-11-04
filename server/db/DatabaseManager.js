@@ -3,6 +3,9 @@ class DatabaseManager {
     throw new Error("connect() not implemented");
   }
 
+  async disconnect() {
+  }
+
   async getUserByEmail(email) {
     throw new Error("getUserByEmail() not implemented");
   }
@@ -16,6 +19,11 @@ class DatabaseManager {
   async getPlaylistsByOwnerEmail(ownerEmail) {
     throw new Error("getPlaylistsByOwnerEmail() not implemented");
   }
+
+  async getAllPlaylistsForUser(ownerEmail) {
+    return this.getPlaylistsByOwnerEmail(ownerEmail);
+  }
+  
   async getPlaylistById(id) {
     throw new Error("getPlaylistById() not implemented");
   }

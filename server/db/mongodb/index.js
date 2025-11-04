@@ -12,6 +12,10 @@ class MongoDatabaseManager extends DatabaseManager {
     console.log("[DB] Connected to MongoDB");
   }
 
+  async disconnect() {
+    await mongoose.disconnect();
+  }
+
   async getUserByEmail(email) {
     return User.findOne({ email }).exec();
   }
@@ -27,6 +31,10 @@ class MongoDatabaseManager extends DatabaseManager {
 
   async getPlaylistsByOwnerEmail(ownerEmail) {
     return Playlist.find({ ownerEmail }).exec();
+  }
+  
+  async getAllPlaylistsForUser(ownerEmail) {
+    return this.getPlaylistsByOwnerEmail(ownerEmail);
   }
 
   async getPlaylistById(id) {

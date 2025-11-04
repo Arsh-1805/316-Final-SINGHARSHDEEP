@@ -18,20 +18,41 @@ beforeAll(async () => {
   await db.connect();
 });
 
+afterAll(async () => {
+  if (db && db.disconnect) {
+    await db.disconnect();
+  }
+});
+
 describe("DatabaseManager basic operations", () => {
-  it("can create and retrieve a playlist", async () => {
-    const pl = await db.createPlaylist({
-      name: "Vitest Example",
-      ownerEmail: "vitest@example.com",
-      songs: [],
-    });
-    const fetched = await db.getPlaylistById(pl._id || pl.id);
-    expect(fetched).toBeDefined();
-    expect(fetched.name).toBe("Vitest Example");
+  it("can get all playlists for a user", async () => {
+    const email = "arsh@doe.com";
+    const playlists = await db.getAllPlaylistsForUser(email);
+    expect(playlists).toBeDefined();
+    expect(Array.isArray(playlists)).toBe(true);
   });
 
-  it("can fetch playlists by owner email", async () => {
-    const lists = await db.getPlaylistsByOwnerEmail("vitest@example.com");
-    expect(Array.isArray(lists)).toBe(true);
+  it("can create and then delete a playlist", async () => {
+    const email = "arsh@doe.com";
+    const created = await db.createPlaylist({
+      name: "Test From Vitest",
+      ownerEmail: email,
+      songs: [],
+    });
+
+    expect(created).toBeDefined();
+    expect(created._id || created.id).toBeDefined();
+
+    const id = created._id ? created._id.toString() : created.id.toString();
+
+    const fetched = await db.getPlaylistById(id);
+    expect(fetched).toBeDefined();
+    expect(fetched.name).toBe("Test From Vitest");
+
+    await db.deletePlaylist(id);
+
+    const shouldBeGone = await db.getPlaylistById(id);
+    expect(shouldBeGone).toBeNull();
   });
 });
+

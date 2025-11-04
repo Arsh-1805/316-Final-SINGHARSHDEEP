@@ -44,6 +44,12 @@ class PostgresDatabaseManager extends DatabaseManager {
     console.log("[DB] Connected to PostgreSQL");
   }
 
+    async disconnect() {
+    if (this.sequelize) {
+      await this.sequelize.close();
+    }
+  }
+
   async getUserByEmail(email) {
     return this.User.findOne({ where: { email } });
   }
@@ -58,6 +64,10 @@ class PostgresDatabaseManager extends DatabaseManager {
 
   async getPlaylistsByOwnerEmail(ownerEmail) {
     return this.Playlist.findAll({ where: { ownerEmail } });
+  }
+
+  async getAllPlaylistsForUser(ownerEmail) {
+    return this.getPlaylistsByOwnerEmail(ownerEmail);
   }
 
   async getPlaylistById(id) {
