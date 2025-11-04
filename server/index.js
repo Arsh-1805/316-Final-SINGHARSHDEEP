@@ -14,7 +14,6 @@ const playlistRouter = require("./routes/playlist-router");
 
 const app = express();
 
-// ===== middleware =====
 app.use(
   cors({
     origin: process.env.ORIGIN || "http://localhost:3000",
@@ -22,10 +21,8 @@ app.use(
   })
 );
 app.use(express.json());
-// 👇 this was missing – your auth middleware needs cookies
 app.use(cookieParser());
 
-// ===== routes =====
 app.use("/auth", authRouter);
 app.use("/api", playlistRouter);
 

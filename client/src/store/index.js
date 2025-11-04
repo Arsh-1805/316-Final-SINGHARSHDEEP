@@ -299,6 +299,7 @@ store.createNewList = async function () {
 
     console.log("createNewList response:", response);
 
+    // 4. same success check as you had
     if (response.status === 201 && response.data && response.data.playlist) {
         tps.clearAllTransactions();
         let newList = response.data.playlist;

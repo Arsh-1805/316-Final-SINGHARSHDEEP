@@ -1,78 +1,81 @@
 const { Sequelize, DataTypes } = require("sequelize");
 const DatabaseManager = require("../DatabaseManager");
+const bcrypt = require("bcryptjs");
 
 class PostgresDatabaseManager extends DatabaseManager {
-  async init() {
-    const sequelize = new Sequelize(
-      process.env.PG_DB,
-      process.env.PG_USER,
-      process.env.PG_PASSWORD,
-      {
-        host: process.env.PG_HOST || "127.0.0.1",
-        port: process.env.PG_PORT || 5432,
-        dialect: "postgres",
-        logging: false,
-      }
-    );
-
-    try {
-      await sequelize.authenticate();
-      console.log("[DB] Connected to PostgreSQL");
-
-      this.Playlist = sequelize.define("Playlist", {
-        name: { type: DataTypes.STRING, allowNull: false },
-        ownerEmail: { type: DataTypes.STRING, allowNull: false },
-        songs: { type: DataTypes.JSONB, allowNull: false, defaultValue: [] },
-      });
-
-      this.User = sequelize.define("User", {
-        email: { type: DataTypes.STRING, allowNull: false, unique: true },
-        passwordHash: { type: DataTypes.STRING, allowNull: false },
-      });
-
-      await sequelize.sync();
-      this.sequelize = sequelize;
-    } catch (err) {
-      console.error("[DB] Failed to connect to Postgres:", err);
-      throw err;
-    }
+  constructor() {
+    super();
+    this.sequelize = null;
+    this.User = null;
+    this.Playlist = null;
   }
 
   async connect() {
-    return this.init();
+    const db = process.env.PG_DB;
+    const user = process.env.PG_USER;
+    const password = process.env.PG_PASSWORD;
+    const host = process.env.PG_HOST || "127.0.0.1";
+    const port = process.env.PG_PORT || 5432;
+
+    this.sequelize = new Sequelize(db, user, password, {
+      host,
+      port,
+      dialect: "postgres",
+      logging: false,
+    });
+
+    this.User = this.sequelize.define("User", {
+      firstName: DataTypes.STRING,
+      lastName: DataTypes.STRING,
+      email: { type: DataTypes.STRING, unique: true },
+      passwordHash: DataTypes.STRING,
+    });
+
+    this.Playlist = this.sequelize.define("Playlist", {
+      name: DataTypes.STRING,
+      ownerEmail: DataTypes.STRING,
+      songs: {
+        type: DataTypes.JSONB,
+        defaultValue: [],
+      },
+    });
+
+    await this.sequelize.sync();
+    console.log("[DB] Connected to PostgreSQL");
   }
-  async createPlaylist(data) {
-    return this.Playlist.create(data);
+
+  async getUserByEmail(email) {
+    return this.User.findOne({ where: { email } });
+  }
+
+  async getUserById(id) {
+    return this.User.findByPk(id);
+  }
+
+  async createUser(userData) {
+    return this.User.create(userData);
+  }
+
+  async getPlaylistsByOwnerEmail(ownerEmail) {
+    return this.Playlist.findAll({ where: { ownerEmail } });
   }
 
   async getPlaylistById(id) {
     return this.Playlist.findByPk(id);
   }
 
-  async getPlaylistPairs(ownerEmail) {
-    const lists = await this.Playlist.findAll({
-      where: { ownerEmail },
-      attributes: ["id", "name"],
-    });
-    return lists.map((p) => ({ _id: p.id, name: p.name }));
+  async createPlaylist(playlistData) {
+    return this.Playlist.create(playlistData);
   }
 
-  async updatePlaylist(id, data) {
-    const playlist = await this.getPlaylistById(id);
+  async updatePlaylist(id, playlistData) {
+    const playlist = await this.Playlist.findByPk(id);
     if (!playlist) return null;
-    await playlist.update(data);
-    return playlist;
+    return playlist.update(playlistData);
   }
 
   async deletePlaylist(id) {
-    const playlist = await this.getPlaylistById(id);
-    if (!playlist) return null;
-    await playlist.destroy();
-    return playlist;
-  }
-
-  async getUserByEmail(email) {
-    return this.User.findOne({ where: { email } });
+    return this.Playlist.destroy({ where: { id } });
   }
 }
 

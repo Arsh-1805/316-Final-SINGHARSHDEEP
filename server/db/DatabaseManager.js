@@ -1,30 +1,32 @@
 class DatabaseManager {
-  async init() {
-    throw new Error("init() not implemented");
-  }
-
-  async createPlaylist(data) {
-    throw new Error("createPlaylist() not implemented");
-  }
-
-  async getPlaylistById(id) {
-    throw new Error("getPlaylistById() not implemented");
-  }
-
-  async getPlaylistPairs(ownerEmail) {
-    throw new Error("getPlaylistPairs() not implemented");
-  }
-
-  async updatePlaylist(id, data) {
-    throw new Error("updatePlaylist() not implemented");
-  }
-
-  async deletePlaylist(id) {
-    throw new Error("deletePlaylist() not implemented");
+  async connect() {
+    throw new Error("connect() not implemented");
   }
 
   async getUserByEmail(email) {
     throw new Error("getUserByEmail() not implemented");
+  }
+  async getUserById(id) {
+    throw new Error("getUserById() not implemented");
+  }
+  async createUser(userData) {
+    throw new Error("createUser() not implemented");
+  }
+
+  async getPlaylistsByOwnerEmail(ownerEmail) {
+    throw new Error("getPlaylistsByOwnerEmail() not implemented");
+  }
+  async getPlaylistById(id) {
+    throw new Error("getPlaylistById() not implemented");
+  }
+  async createPlaylist(playlistData) {
+    throw new Error("createPlaylist() not implemented");
+  }
+  async updatePlaylist(id, playlistData) {
+    throw new Error("updatePlaylist() not implemented");
+  }
+  async deletePlaylist(id) {
+    throw new Error("deletePlaylist() not implemented");
   }
 }
 

@@ -1,52 +1,54 @@
-const API_BASE = "http://localhost:4000";
+const API_BASE = "http://localhost:4000/api";
 
 async function fetchJSON(url, options = {}) {
   const res = await fetch(url, {
-    credentials: "include",
-    headers: { "Content-Type": "application/json" },
+    credentials: "include",            
+    headers: {
+      "Content-Type": "application/json",
+    },
     ...options,
   });
 
   let data = null;
   try {
     data = await res.json();
-  } catch (e) {
+  } catch (err) {
     data = null;
   }
 
   return { status: res.status, data };
 }
 
-const getPlaylistPairs = () =>
-  fetchJSON(`${API_BASE}/api/playlistpairs`, { method: "GET" });
-
-const getPlaylistById = (id) =>
-  fetchJSON(`${API_BASE}/api/playlist/${id}`, { method: "GET" });
-
-const createPlaylist = (name, songs = [], ownerEmail) =>
-  fetchJSON(`${API_BASE}/api/playlist`, {
-    method: "POST",
-    body: JSON.stringify({ name, songs, ownerEmail }),
-  });
-
-
-const updatePlaylistById = (id, playlist) =>
-  fetchJSON(`${API_BASE}/api/playlist/${id}`, {
-    method: "PUT",
-    body: JSON.stringify({ playlist }),   
-  });
-
-const deletePlaylistById = (id) =>
-  fetchJSON(`${API_BASE}/api/playlist/${id}`, {
-    method: "DELETE",
-  });
-
 const apis = {
-  getPlaylistPairs,
-  getPlaylistById,
-  createPlaylist,
-  updatePlaylistById,
-  deletePlaylistById,
+  getPlaylistPairs: () =>
+    fetchJSON(`${API_BASE}/playlistpairs`, {
+      method: "GET",
+    }),
+
+  getPlaylistById: (id) =>
+    fetchJSON(`${API_BASE}/playlist/${id}`, {
+      method: "GET",
+    }),
+
+  createPlaylist: (name, songs, ownerEmail) =>
+    fetchJSON(`${API_BASE}/playlist`, {
+      method: "POST",
+      body: JSON.stringify({
+        name,
+        songs,
+        ownerEmail,
+      }),
+    }),
+
+  updatePlaylistById: (id, playlist) =>
+    fetchJSON(`${API_BASE}/playlist/${id}`, {
+      method: "PUT",
+      body: JSON.stringify({ playlist }),
+    }),
+  deletePlaylistById: (id) =>
+    fetchJSON(`${API_BASE}/playlist/${id}`, {
+      method: "DELETE",
+    }),
 };
 
 export default apis;

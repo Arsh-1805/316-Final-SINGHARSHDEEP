@@ -27,14 +27,12 @@ function SongCard(props) {
         let targetIndex = index;
         let sourceIndex = Number(event.dataTransfer.getData("song"));
 
-        // UPDATE THE LIST
         store.addMoveSongTransaction(sourceIndex, targetIndex);
     }
     function handleRemoveSong(event) {
         store.addRemoveSongTransaction(song, index);
     }
     function handleClick(event) {
-        // DOUBLE CLICK IS FOR SONG EDITING
         if (event.detail === 2) {
             console.log("double clicked");
             store.showEditSongModal(index, song);

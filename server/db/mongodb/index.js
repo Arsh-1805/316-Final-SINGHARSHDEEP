@@ -1,46 +1,49 @@
 const mongoose = require("mongoose");
 const DatabaseManager = require("../DatabaseManager");
-const Playlist = require("../../models/playlist-model");
 const User = require("../../models/user-model");
+const Playlist = require("../../models/playlist-model");
 
 class MongoDatabaseManager extends DatabaseManager {
-  async init() {
-    const url = process.env.DB_CONNECT || "mongodb://127.0.0.1:27017/playlister";
-    await mongoose.connect(url, {
-      useNewUrlParser: true,
-      useUnifiedTopology: true,
-    });
+  async connect() {
+    const uri = process.env.DB_CONNECT;
+    if (!uri) throw new Error("DB_CONNECT missing in .env");
+
+    await mongoose.connect(uri, { useNewUrlParser: true, useUnifiedTopology: true });
     console.log("[DB] Connected to MongoDB");
   }
 
-  async connect() {
-    return this.init();
-  }
-
   async getUserByEmail(email) {
-    return User.findOne({ email });
+    return User.findOne({ email }).exec();
   }
 
-  async createPlaylist(data) {
-    const playlist = new Playlist(data);
-    return playlist.save();
+  async getUserById(id) {
+    return User.findById(id).exec();
+  }
+
+  async createUser(userData) {
+    const user = new User(userData);
+    return user.save();
+  }
+
+  async getPlaylistsByOwnerEmail(ownerEmail) {
+    return Playlist.find({ ownerEmail }).exec();
   }
 
   async getPlaylistById(id) {
-    return Playlist.findById(id);
+    return Playlist.findById(id).exec();
   }
 
-  async getPlaylistPairs(ownerEmail) {
-    const lists = await Playlist.find({ ownerEmail });
-    return lists.map((p) => ({ _id: p._id, name: p.name }));
+  async createPlaylist(playlistData) {
+    const playlist = new Playlist(playlistData);
+    return playlist.save();
   }
 
-  async updatePlaylist(id, data) {
-    return Playlist.findByIdAndUpdate(id, data, { new: true });
+  async updatePlaylist(id, playlistData) {
+    return Playlist.findByIdAndUpdate(id, playlistData, { new: true }).exec();
   }
 
   async deletePlaylist(id) {
-    return Playlist.findByIdAndDelete(id);
+    return Playlist.findByIdAndDelete(id).exec();
   }
 }
 

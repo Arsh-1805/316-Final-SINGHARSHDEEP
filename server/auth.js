@@ -1,27 +1,13 @@
 const jwt = require("jsonwebtoken");
 
-function signToken(userId) {
-  return jwt.sign(
-    {
-      userId: userId
-    },
-    process.env.JWT_SECRET,
-    { expiresIn: "1d" }
-  );
+const JWT_SECRET = process.env.JWT_SECRET || "dev_secret";
+
+function signToken(payload) {
+  return jwt.sign(payload, JWT_SECRET, { expiresIn: "1d" });
 }
 
-function verifyUser(req) {
-  try {
-    const token = req.cookies.token;
-    if (!token) return null;
-    const verified = jwt.verify(token, process.env.JWT_SECRET);
-    return verified.userId;
-  } catch (err) {
-    return null;
-  }
+function verifyToken(token) {
+  return jwt.verify(token, JWT_SECRET);
 }
 
-module.exports = {
-  signToken,
-  verifyUser,
-};
+module.exports = { signToken, verifyToken };
