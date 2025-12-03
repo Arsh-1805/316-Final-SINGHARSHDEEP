@@ -21,7 +21,8 @@ function AuthContextProvider(props) {
 
   useEffect(() => {
     auth.getLoggedIn();
-}, []);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, []);
 
   const authReducer = (action) => {
     const { type, payload } = action;
@@ -59,7 +60,7 @@ function AuthContextProvider(props) {
     }
   };
 
-
+  // GET LOGGED IN
   auth.getLoggedIn = async function () {
     const response = await authRequestSender.getLoggedIn();
     if (response.status === 200) {
@@ -73,6 +74,7 @@ function AuthContextProvider(props) {
     }
   };
 
+  // REGISTER – create account but DO NOT log in (Use-Case 2.1)
   auth.registerUser = async function (
     firstName,
     lastName,
@@ -90,22 +92,25 @@ function AuthContextProvider(props) {
       );
 
       if (response.status === 200) {
+        // account created, but loggedIn stays false
         authReducer({
           type: AuthActionType.REGISTER_USER,
           payload: {
-            user: response.data.user,
-            loggedIn: true,
+            user: null,
+            loggedIn: false,
             errorMessage: null,
           },
         });
-        history.push("/");
+        // send them to Login screen so they can log in manually
+        history.push("/login");
       } else {
         authReducer({
           type: AuthActionType.REGISTER_USER,
           payload: {
             user: auth.user,
             loggedIn: false,
-            errorMessage: response.data.errorMessage || "Register failed.",
+            errorMessage:
+              response.data.errorMessage || "Register failed.",
           },
         });
       }
@@ -121,6 +126,7 @@ function AuthContextProvider(props) {
     }
   };
 
+  // LOGIN
   auth.loginUser = async function (email, password) {
     try {
       const response = await authRequestSender.loginUser(email, password);
@@ -157,14 +163,22 @@ function AuthContextProvider(props) {
     }
   };
 
+  // LOGOUT
   auth.logoutUser = async function () {
-    const response = await authRequestSender.logoutUser();
-    if (response.status === 200) {
+    try {
+      const response = await authRequestSender.logoutUser();
+      if (response.status !== 200) {
+        console.error("Logout server error:", response.status);
+      }
+    } catch (err) {
+      console.error("Logout request failed (forcing client logout):", err);
+    } finally {
+      // Always clear auth locally
       authReducer({
         type: AuthActionType.LOGOUT_USER,
         payload: null,
       });
-      history.push("/login");
+      history.push("/login"); // or "/" depending on your flow
     }
   };
 
