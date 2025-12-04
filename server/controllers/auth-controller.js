@@ -97,11 +97,6 @@ async function getLoggedIn(req, res) {
   }
 }
 
-async function logoutUser(req, res) {
-  res.clearCookie("token");
-  return res.status(200).json({ success: true });
-}
-
 const logoutUser = (req, res) => {
   res.cookie("token", "", {
     httpOnly: true,
