@@ -19,17 +19,24 @@ async function fetchJSON(url, options = {}) {
 export const getLoggedIn = () =>
   fetchJSON(`${API_BASE}/auth/loggedIn`, { method: "GET" });
 
-export const registerUser = (firstName, lastName, email, password, passwordVerify) =>
+export const registerUser = (
+  email,
+  userName,
+  password,
+  passwordVerify,
+  avatar
+) =>
   fetchJSON(`${API_BASE}/auth/register`, {
     method: "POST",
     body: JSON.stringify({
-      firstName,
-      lastName,
       email,
+      userName,
       password,
       passwordVerify,
+      avatar,
     }),
   });
+
 
 export const loginUser = (email, password) =>
   fetchJSON(`${API_BASE}/auth/login`, {

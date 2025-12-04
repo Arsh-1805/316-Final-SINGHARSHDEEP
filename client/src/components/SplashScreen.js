@@ -1,25 +1,25 @@
 import React from "react";
-import { useHistory } from "react-router-dom";
 import "./SplashScreen.css";
+import { useHistory } from "react-router-dom";
 
 export default function SplashScreen() {
   const history = useHistory();
 
   return (
-    <div id="splash-screen-container">
-      <div className="welcome-card">
-        <h1 className="welcome-title">The Playlister</h1>
+    <div id="splash-wrapper">
+      <div id="splash-card">
+        <div id="splash-title">The Playlister</div>
 
-        <div className="welcome-buttons">
-          <button onClick={() => history.push("/playlists")}>
+        <div id="splash-icon">♪</div>
+
+        <div id="splash-buttons">
+          <button className="splash-btn" onClick={() => history.push("/home")}>
             Continue as Guest
           </button>
-
-          <button onClick={() => history.push("/login")}>
+          <button className="splash-btn" onClick={() => history.push("/login")}>
             Login
           </button>
-
-          <button onClick={() => history.push("/register")}>
+          <button className="splash-btn" onClick={() => history.push("/register")}>
             Create Account
           </button>
         </div>

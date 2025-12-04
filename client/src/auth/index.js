@@ -21,7 +21,6 @@ function AuthContextProvider(props) {
 
   useEffect(() => {
     auth.getLoggedIn();
-    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
   const authReducer = (action) => {
@@ -60,7 +59,6 @@ function AuthContextProvider(props) {
     }
   };
 
-  // GET LOGGED IN
   auth.getLoggedIn = async function () {
     const response = await authRequestSender.getLoggedIn();
     if (response.status === 200) {
@@ -74,59 +72,56 @@ function AuthContextProvider(props) {
     }
   };
 
-  // REGISTER – create account but DO NOT log in (Use-Case 2.1)
-  auth.registerUser = async function (
-    firstName,
-    lastName,
-    email,
-    password,
-    passwordVerify
-  ) {
-    try {
-      const response = await authRequestSender.registerUser(
-        firstName,
-        lastName,
-        email,
-        password,
-        passwordVerify
-      );
+auth.registerUser = async function (
+  email,
+  userName,
+  password,
+  passwordVerify,
+  avatar
+) {
+  try {
+    const response = await authRequestSender.registerUser(
+      email,
+      userName,
+      password,
+      passwordVerify,
+      avatar
+    );
 
-      if (response.status === 200) {
-        // account created, but loggedIn stays false
-        authReducer({
-          type: AuthActionType.REGISTER_USER,
-          payload: {
-            user: null,
-            loggedIn: false,
-            errorMessage: null,
-          },
-        });
-        // send them to Login screen so they can log in manually
-        history.push("/login");
-      } else {
-        authReducer({
-          type: AuthActionType.REGISTER_USER,
-          payload: {
-            user: auth.user,
-            loggedIn: false,
-            errorMessage:
-              response.data.errorMessage || "Register failed.",
-          },
-        });
-      }
-    } catch (err) {
+    if (response.status === 200) {
+      authReducer({
+        type: AuthActionType.REGISTER_USER,
+        payload: {
+          user: null,
+          loggedIn: false,
+          errorMessage: null,
+        },
+      });
+      history.push("/login");
+    } else {
       authReducer({
         type: AuthActionType.REGISTER_USER,
         payload: {
           user: auth.user,
           loggedIn: false,
-          errorMessage: "Register failed.",
+          errorMessage:
+            response.data.errorMessage || "Register failed.",
         },
       });
     }
-  };
+  } catch (err) {
+    authReducer({
+      type: AuthActionType.REGISTER_USER,
+      payload: {
+        user: auth.user,
+        loggedIn: false,
+        errorMessage: "Register failed.",
+      },
+    });
+  }
+};
 
-  // LOGIN
+
   auth.loginUser = async function (email, password) {
     try {
       const response = await authRequestSender.loginUser(email, password);
@@ -163,7 +158,6 @@ function AuthContextProvider(props) {
     }
   };
 
-  // LOGOUT
   auth.logoutUser = async function () {
     try {
       const response = await authRequestSender.logoutUser();
@@ -173,23 +167,24 @@ function AuthContextProvider(props) {
     } catch (err) {
       console.error("Logout request failed (forcing client logout):", err);
     } finally {
-      // Always clear auth locally
       authReducer({
         type: AuthActionType.LOGOUT_USER,
         payload: null,
       });
-      history.push("/login"); // or "/" depending on your flow
+      history.push("/login"); 
     }
   };
 
-  auth.getUserInitials = function () {
-    let initials = "";
-    if (auth.user) {
-      initials += auth.user.firstName.charAt(0);
-      initials += auth.user.lastName.charAt(0);
-    }
-    return initials;
-  };
+auth.getUserInitials = function () {
+  if (!auth.user) return "";
+
+  if (auth.user.userName && auth.user.userName.length > 0) {
+    return auth.user.userName.charAt(0).toUpperCase();
+  }
+
+  return "";
+};
+
 
   return (
     <AuthContext.Provider

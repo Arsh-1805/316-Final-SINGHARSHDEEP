@@ -16,10 +16,6 @@
   --bounceEasing: cubic-bezier(0.51, 0.92, 0.24, 1.15);
 }
 
-body {
-  background-image: url('https://thumbs.dreamstime.com/b/music-notes-symbols-seamless-pattern-design-fully-editable-fill-background-color-music-notes-symbols-seamless-pattern-118273669.jpg')
-}
-
 #root {
   background-color: var(--swatch-primary);
   font-family: "Lexend Exa";

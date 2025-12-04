@@ -4,28 +4,52 @@ const { signToken, verifyToken } = require("../auth");
 
 async function registerUser(req, res) {
   try {
-    const { firstName, lastName, email, password } = req.body;
+    const { email, userName, password, passwordVerify, avatar } = req.body;
+
+    // basic validation
+    if (!email || !userName || !password || !passwordVerify || !avatar) {
+      return res
+        .status(400)
+        .json({ success: false, error: "All fields are required." });
+    }
+
+    if (password.length < 8) {
+      return res.status(400).json({
+        success: false,
+        error: "Password must be at least 8 characters.",
+      });
+    }
+
+    if (password !== passwordVerify) {
+      return res
+        .status(400)
+        .json({ success: false, error: "Passwords do not match." });
+    }
 
     const existing = await User.findOne({ email });
     if (existing) {
-      return res.status(400).json({ success: false, error: "Email already used" });
+      return res
+        .status(400)
+        .json({ success: false, error: "Email already used" });
     }
 
     const passwordHash = await bcrypt.hash(password, 10);
     const user = new User({
-      firstName,
-      lastName,
       email,
+      userName,
+      avatar,
       passwordHash,
     });
     await user.save();
-
-    return res.status(201).json({ success: true });
+    return res.status(200).json({ success: true });
   } catch (err) {
     console.error("registerUser error:", err);
-    return res.status(500).json({ success: false, error: "Server error" });
+    return res
+      .status(500)
+      .json({ success: false, error: "Server error" });
   }
 }
+
 
 async function loginUser(req, res) {
   try {
@@ -33,21 +57,28 @@ async function loginUser(req, res) {
 
     const user = await User.findOne({ email });
     if (!user) {
-      return res.status(401).json({ success: false, error: "User not found" });
+      return res
+        .status(401)
+        .json({ success: false, error: "User not found" });
     }
 
-    const passwordValid = await bcrypt.compare(password, user.passwordHash);
+    const passwordValid = await bcrypt.compare(
+      password,
+      user.passwordHash
+    );
     if (!passwordValid) {
-      return res.status(401).json({ success: false, error: "Invalid password" });
+      return res
+        .status(401)
+        .json({ success: false, error: "Invalid password" });
     }
 
     const token = signToken({ id: user._id, email: user.email });
 
     res.cookie("token", token, {
       httpOnly: true,
-      secure: false,        
+      secure: false,
       sameSite: "lax",
-      maxAge: 24 * 60 * 60 * 1000, 
+      maxAge: 24 * 60 * 60 * 1000,
     });
 
     console.log("User logged in:", user.email);
@@ -56,15 +87,18 @@ async function loginUser(req, res) {
       success: true,
       user: {
         email: user.email,
-        firstName: user.firstName,
-        lastName: user.lastName,
+        userName: user.userName,
+        avatar: user.avatar,
       },
     });
   } catch (err) {
     console.error("loginUser error:", err);
-    return res.status(500).json({ success: false, error: "Server error while logging in" });
+    return res
+      .status(500)
+      .json({ success: false, error: "Server error while logging in" });
   }
 }
+
 
 async function getLoggedIn(req, res) {
   try {
@@ -87,13 +121,15 @@ async function getLoggedIn(req, res) {
       loggedIn: true,
       user: {
         email: user.email,
-        firstName: user.firstName,
-        lastName: user.lastName,
+        userName: user.userName,
+        avatar: user.avatar,
       },
     });
   } catch (err) {
     console.error("getLoggedIn error:", err);
-    return res.status(500).json({ success: false, error: "Server error" });
+    return res
+      .status(500)
+      .json({ success: false, error: "Server error" });
   }
 }
 
