@@ -95,20 +95,32 @@ export default function AppBanner() {
             return <AccountCircle />;
     }
 
-    return (
-        <Box sx={{flexGrow: 1}}>
-            <AppBar position="static">
-                <Toolbar>
-                    <Typography                        
+        return (
+        <Box sx={{ flexGrow: 1 }}>
+            <AppBar
+                position="static"
+                sx={{
+                    backgroundColor: "#ff66ff",      
+                    boxShadow: "none",               
+                }}
+            >
+                <Toolbar sx={{ minHeight: 64 }}>
+                    <Typography
                         variant="h4"
                         noWrap
                         component="div"
-                        sx={{ display: { xs: 'none', sm: 'block' } }}                        
+                        sx={{ display: { xs: "none", sm: "block" } }}
                     >
-                        <Link onClick={handleHouseClick} style={{ textDecoration: 'none', color: 'white' }} to='/'>⌂</Link>
+                        <Link
+                            onClick={handleHouseClick}
+                            style={{ textDecoration: "none", color: "white" }}
+                            to="/"
+                        >
+                            ⌂
+                        </Link>
                     </Typography>
                     <Box sx={{ flexGrow: 1 }}>{editToolbar}</Box>
-                    <Box sx={{ height: "90px", display: { xs: 'none', md: 'flex' } }}>
+                    <Box sx={{ height: "64px", display: { xs: "none", md: "flex" } }}>
                         <IconButton
                             size="large"
                             edge="end"
@@ -118,14 +130,21 @@ export default function AppBanner() {
                             onClick={handleProfileMenuOpen}
                             color="inherit"
                         >
-                            { getAccountMenu(auth.loggedIn) }
+                            {getAccountMenu(auth.loggedIn)}
                         </IconButton>
                     </Box>
                 </Toolbar>
             </AppBar>
-            {
-                menu
-            }
+
+            <Box
+                sx={{
+                    width: "100%",
+                    height: "8px",
+                    backgroundColor: "#e0e0e0",
+                }}
+            />
+
+            {menu}
         </Box>
     );
 }

@@ -27,22 +27,6 @@
   left: 0%;
 }
 
-#playlister-banner {
-  position: absolute;
-  left: 0%;
-  top: 0%;
-  width: 100%;
-  height: 10%;
-  float: left;
-  background-image: linear-gradient(to bottom, #b8b808, #636723);
-  color: white;
-  font-size: 48pt;
-  border-color: black;
-  border-width: 2px;
-  border-style: solid;
-  border-radius: 10px;
-}
-
 #edit-toolbar {
   background-color: transparent;
   transform: translate(41%, 0%);
