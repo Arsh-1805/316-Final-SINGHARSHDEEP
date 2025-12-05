@@ -1,5 +1,5 @@
 import { useContext, useState } from 'react';
-import { Link } from 'react-router-dom'
+import { Link, useHistory } from 'react-router-dom'
 import AuthContext from '../auth';
 import { GlobalStoreContext } from '../store'
 
@@ -19,6 +19,7 @@ export default function AppBanner() {
     const { store } = useContext(GlobalStoreContext);
     const [anchorEl, setAnchorEl] = useState(null);
     const isMenuOpen = Boolean(anchorEl);
+    const history = useHistory();
 
     const handleProfileMenuOpen = (event) => {
         setAnchorEl(event.currentTarget);
@@ -58,24 +59,33 @@ export default function AppBanner() {
             <MenuItem onClick={handleMenuClose}><Link to='/register/'>Create New Account</Link></MenuItem>
         </Menu>
     );
-    const loggedInMenu = 
-        <Menu
-            anchorEl={anchorEl}
-            anchorOrigin={{
-                vertical: 'top',
-                horizontal: 'right',
+    
+const loggedInMenu =
+    <Menu
+        anchorEl={anchorEl}
+        anchorOrigin={{
+            vertical: 'top',
+            horizontal: 'right',
+        }}
+        id={menuId}
+        keepMounted
+        transformOrigin={{
+            vertical: 'top',
+            horizontal: 'right',
+        }}
+        open={isMenuOpen}
+        onClose={handleMenuClose}
+    >
+        <MenuItem
+            onClick={() => {
+                handleMenuClose();
+                history.push("/account/");   
             }}
-            id={menuId}
-            keepMounted
-            transformOrigin={{
-                vertical: 'top',
-                horizontal: 'right',
-            }}
-            open={isMenuOpen}
-            onClose={handleMenuClose}
         >
-            <MenuItem onClick={handleLogout}>Logout</MenuItem>
-        </Menu>        
+            Edit Account
+        </MenuItem>
+        <MenuItem onClick={handleLogout}>Logout</MenuItem>
+    </Menu>;
 
     let editToolbar = "";
     let menu = loggedOutMenu;

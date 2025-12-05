@@ -9,6 +9,7 @@ export const AuthActionType = {
   LOGIN_USER: "LOGIN_USER",
   LOGOUT_USER: "LOGOUT_USER",
   REGISTER_USER: "REGISTER_USER",
+  UPDATE_USER: "UPDATE_USER",
 };
 
 function AuthContextProvider(props) {
@@ -54,6 +55,13 @@ function AuthContextProvider(props) {
           errorMessage: payload.errorMessage,
         });
       }
+          case AuthActionType.UPDATE_USER: {
+      return setAuth({
+        user: payload.user,
+        loggedIn: true,
+        errorMessage: payload.errorMessage,
+      });
+    }
       default:
         return auth;
     }
@@ -185,6 +193,54 @@ auth.getUserInitials = function () {
   return "";
 };
 
+  auth.updateUser = async function (
+    email,
+    userName,
+    password,
+    passwordVerify,
+    avatar
+  ) {
+    try {
+      const response = await authRequestSender.updateUser(
+        email,
+        userName,
+        password,
+        passwordVerify,
+        avatar
+      );
+
+      if (response.status === 200) {
+        authReducer({
+          type: AuthActionType.UPDATE_USER,
+          payload: {
+            user: response.data.user,
+            loggedIn: true,
+            errorMessage: null,
+          },
+        });
+        history.push("/");   // go back to playlists/home
+      } else {
+        authReducer({
+          type: AuthActionType.UPDATE_USER,
+          payload: {
+            user: auth.user,
+            loggedIn: true,
+            errorMessage:
+              response.data.error || "Failed to update account.",
+          },
+        });
+      }
+    } catch (err) {
+      authReducer({
+        type: AuthActionType.UPDATE_USER,
+        payload: {
+          user: auth.user,
+          loggedIn: true,
+          errorMessage: "Failed to update account.",
+        },
+      });
+    }
+  };
 
   return (
     <AuthContext.Provider

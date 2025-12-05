@@ -49,11 +49,31 @@ export const logoutUser = () =>
     method: "POST",
   });
 
+export const updateUser = (
+  email,
+  userName,
+  password,
+  passwordVerify,
+  avatar
+) =>
+  fetchJSON(`${API_BASE}/auth/update`, {
+    method: "PUT",
+    body: JSON.stringify({
+      email,
+      userName,
+      password,
+      passwordVerify,
+      avatar,
+    }),
+  });
+
+
 const apis = {
   getLoggedIn,
   registerUser,
   loginUser,
   logoutUser,
+  updateUser,
 };
 
 export default apis;
