@@ -13,6 +13,7 @@ import Menu from '@mui/material/Menu';
 import MenuItem from '@mui/material/MenuItem';
 import Toolbar from '@mui/material/Toolbar';
 import Typography from '@mui/material/Typography';
+import Avatar from '@mui/material/Avatar';
 
 export default function AppBanner() {
     const { auth } = useContext(AuthContext);
@@ -59,7 +60,7 @@ export default function AppBanner() {
             <MenuItem onClick={handleMenuClose}><Link to='/register/'>Create New Account</Link></MenuItem>
         </Menu>
     );
-    
+
 const loggedInMenu =
     <Menu
         anchorEl={anchorEl}
@@ -96,14 +97,26 @@ const loggedInMenu =
         }
     }
     
-    function getAccountMenu(loggedIn) {
-        let userInitials = auth.getUserInitials();
-        console.log("userInitials: " + userInitials);
-        if (loggedIn) 
-            return <div>{userInitials}</div>;
-        else
-            return <AccountCircle />;
+function getAccountMenu(loggedIn) {
+    if (loggedIn && auth.user) {
+        if (auth.user.avatar && auth.user.avatar.length > 0) {
+            return (
+                <Avatar
+                    src={auth.user.avatar}
+                    alt={auth.user.userName || "User avatar"}
+                    sx={{ width: 40, height: 40 }}
+                />
+            );
+        }
+        const initials = auth.getUserInitials();
+        return (
+            <Avatar sx={{ width: 40, height: 40 }}>
+                {initials}
+            </Avatar>
+        );
     }
+    return <AccountCircle />;
+}
 
         return (
         <Box sx={{ flexGrow: 1 }}>

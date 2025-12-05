@@ -20,7 +20,7 @@ export default function RegisterScreen() {
   const [userName, setUserName] = useState("");
   const [password, setPassword] = useState("");
   const [passwordVerify, setPasswordVerify] = useState("");
-  const [avatarData, setAvatarData] = useState(""); // base64 string
+  const [avatarData, setAvatarData] = useState("");
   const [avatarError, setAvatarError] = useState("");
 
   const [touched, setTouched] = useState({
@@ -30,7 +30,6 @@ export default function RegisterScreen() {
     passwordVerify: false,
   });
 
-  // === client-side validation ===
   const emailError =
     touched.email && !/^[^@\s]+@[^@\s]+\.[^@\s]+$/.test(email)
       ? "Enter a valid email address."
@@ -51,6 +50,7 @@ export default function RegisterScreen() {
       ? "Passwords do not match."
       : "";
 
+  // NOTE: avatarData is required here so new accounts must choose an avatar
   const isFormValid =
     email &&
     userName.trim().length > 0 &&
@@ -66,7 +66,6 @@ export default function RegisterScreen() {
   const markTouched = (field) => () =>
     setTouched((prev) => ({ ...prev, [field]: true }));
 
-  // === avatar (image -> base64 string) ===
   const handleAvatarChange = (e) => {
     const file = e.target.files[0];
     if (!file) return;
@@ -77,35 +76,12 @@ export default function RegisterScreen() {
       return;
     }
 
-    const img = new Image();
-    const objectUrl = URL.createObjectURL(file);
-
-    img.onload = () => {
-      const { width, height } = img;
-      URL.revokeObjectURL(objectUrl);
-
-      // example fixed size; matches spec requirement for prescribed size
-      if (width !== 128 || height !== 128) {
-        setAvatarError("Avatar must be exactly 128 x 128 pixels.");
-        setAvatarData("");
-        return;
-      }
-
-      const reader = new FileReader();
-      reader.onloadend = () => {
-        setAvatarError("");
-        setAvatarData(reader.result); // base64 data URL
-      };
-      reader.readAsDataURL(file);
+    const reader = new FileReader();
+    reader.onloadend = () => {
+      setAvatarError("");
+      setAvatarData(reader.result); // base64 data URL
     };
-
-    img.onerror = () => {
-      URL.revokeObjectURL(objectUrl);
-      setAvatarError("Could not read image.");
-      setAvatarData("");
-    };
-
-    img.src = objectUrl;
+    reader.readAsDataURL(file);
   };
 
   const handleSubmit = (event) => {
@@ -132,9 +108,10 @@ export default function RegisterScreen() {
             sx={{
               p: 4,
               width: "100%",
-              bgcolor: "#fffbe6", // light yellow inner panel
+              bgcolor: "#fffbe6",
             }}
           >
+            {/* Lock icon + title */}
             <Box
               sx={{
                 display: "flex",
@@ -151,77 +128,101 @@ export default function RegisterScreen() {
               </Typography>
             </Box>
 
+            {/* Form */}
             <Box component="form" noValidate onSubmit={handleSubmit}>
-              <Grid container spacing={2}>
-                <Grid item xs={12}>
-                  <TextField
-                    required
-                    fullWidth
-                    id="userName"
-                    label="User Name"
-                    name="userName"
-                    value={userName}
-                    onChange={(e) => setUserName(e.target.value)}
-                    onBlur={markTouched("userName")}
-                    error={Boolean(userNameError)}
-                    helperText={userNameError}
+              {/* Avatar preview + fields, side by side on larger screens */}
+              <Grid container spacing={2} alignItems="center">
+                {/* Avatar preview on the left, like the PDF */}
+                <Grid
+                  item
+                  xs={12}
+                  sm={3}
+                  sx={{ display: "flex", justifyContent: "center" }}
+                >
+                  <Avatar
+                    src={avatarData || ""}
+                    alt="Avatar preview"
+                    sx={{ width: 72, height: 72 }}
                   />
                 </Grid>
-                <Grid item xs={12}>
-                  <TextField
-                    required
-                    fullWidth
-                    id="email"
-                    label="Email Address"
-                    name="email"
-                    autoComplete="email"
-                    value={email}
-                    onChange={(e) => setEmail(e.target.value)}
-                    onBlur={markTouched("email")}
-                    error={Boolean(emailError)}
-                    helperText={emailError || auth.errorMessage || ""}
-                  />
+
+                {/* Text fields on the right */}
+                <Grid item xs={12} sm={9}>
+                  <Grid container spacing={2}>
+                    <Grid item xs={12}>
+                      <TextField
+                        required
+                        fullWidth
+                        id="userName"
+                        label="User Name"
+                        name="userName"
+                        value={userName}
+                        onChange={(e) => setUserName(e.target.value)}
+                        onBlur={markTouched("userName")}
+                        error={Boolean(userNameError)}
+                        helperText={userNameError}
+                      />
+                    </Grid>
+                    <Grid item xs={12}>
+                      <TextField
+                        required
+                        fullWidth
+                        id="email"
+                        label="Email Address"
+                        name="email"
+                        autoComplete="email"
+                        value={email}
+                        onChange={(e) => setEmail(e.target.value)}
+                        onBlur={markTouched("email")}
+                        error={Boolean(emailError)}
+                        helperText={emailError || auth.errorMessage || ""}
+                      />
+                    </Grid>
+                    <Grid item xs={12}>
+                      <TextField
+                        required
+                        fullWidth
+                        name="password"
+                        label="Password"
+                        type="password"
+                        id="password"
+                        autoComplete="new-password"
+                        value={password}
+                        onChange={(e) => setPassword(e.target.value)}
+                        onBlur={markTouched("password")}
+                        error={Boolean(passwordError)}
+                        helperText={
+                          passwordError ||
+                          "Password must be at least 8 characters."
+                        }
+                      />
+                    </Grid>
+                    <Grid item xs={12}>
+                      <TextField
+                        required
+                        fullWidth
+                        name="passwordVerify"
+                        label="Password Confirm"
+                        type="password"
+                        id="passwordVerify"
+                        autoComplete="new-password"
+                        value={passwordVerify}
+                        onChange={(e) => setPasswordVerify(e.target.value)}
+                        onBlur={markTouched("passwordVerify")}
+                        error={Boolean(passwordVerifyError)}
+                        helperText={passwordVerifyError}
+                      />
+                    </Grid>
+                  </Grid>
                 </Grid>
-                <Grid item xs={12}>
-                  <TextField
-                    required
-                    fullWidth
-                    name="password"
-                    label="Password"
-                    type="password"
-                    id="password"
-                    autoComplete="new-password"
-                    value={password}
-                    onChange={(e) => setPassword(e.target.value)}
-                    onBlur={markTouched("password")}
-                    error={Boolean(passwordError)}
-                    helperText={
-                      passwordError || "Password must be at least 8 characters."
-                    }
-                  />
-                </Grid>
-                <Grid item xs={12}>
-                  <TextField
-                    required
-                    fullWidth
-                    name="passwordVerify"
-                    label="Password Confirm"
-                    type="password"
-                    id="passwordVerify"
-                    autoComplete="new-password"
-                    value={passwordVerify}
-                    onChange={(e) => setPasswordVerify(e.target.value)}
-                    onBlur={markTouched("passwordVerify")}
-                    error={Boolean(passwordVerifyError)}
-                    helperText={passwordVerifyError}
-                  />
-                </Grid>
+
+                {/* Avatar chooser row under fields */}
                 <Grid item xs={12}>
                   <Typography variant="body2" sx={{ mb: 1 }}>
                     Avatar Image (128 × 128 pixels)
                   </Typography>
                   <Button variant="contained" component="label">
-                    Choose Avatar
+                    CHOOSE AVATAR
                     <input
                       type="file"
                       hidden
@@ -242,16 +243,23 @@ export default function RegisterScreen() {
                 </Grid>
               </Grid>
 
+              {/* Create Account button */}
               <Button
                 type="submit"
                 fullWidth
                 variant="contained"
-                sx={{ mt: 3, mb: 2 }}
+                sx={{
+                  mt: 3,
+                  mb: 2,
+                  bgcolor: "#333",
+                  "&:hover": { bgcolor: "#000" },
+                }}
                 disabled={!isFormValid}
               >
                 Create Account
               </Button>
 
+              {/* Sign In link */}
               <Grid container justifyContent="center">
                 <Grid item>
                   <Typography variant="body2" sx={{ color: "red" }}>

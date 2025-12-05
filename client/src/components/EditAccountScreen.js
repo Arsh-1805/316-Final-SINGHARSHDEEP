@@ -73,50 +73,29 @@ export default function EditAccountScreen() {
   const markTouched = (field) => () =>
     setTouched((prev) => ({ ...prev, [field]: true }));
 
-  const handleAvatarChange = (e) => {
-    const file = e.target.files[0];
-    if (!file) return;
+const handleAvatarChange = (e) => {
+  const file = e.target.files[0];
+  if (!file) return;
 
-    if (!file.type.startsWith("image/")) {
-      setAvatarError("Please select an image file.");
-      return;
-    }
+  if (!file.type.startsWith("image/")) {
+    setAvatarError("Please select an image file.");
+    setAvatarData("");
+    return;
+  }
 
-    const img = new Image();
-    const objectUrl = URL.createObjectURL(file);
-
-    img.onload = () => {
-      const { width, height } = img;
-      URL.revokeObjectURL(objectUrl);
-
-      if (width !== 128 || height !== 128) {
-        setAvatarError("Avatar must be exactly 128 x 128 pixels.");
-        setAvatarData("");
-        return;
-      }
-
-      const reader = new FileReader();
-      reader.onloadend = () => {
-        setAvatarError("");
-        setAvatarData(reader.result);
-      };
-      reader.readAsDataURL(file);
-    };
-
-    img.onerror = () => {
-      URL.revokeObjectURL(objectUrl);
-      setAvatarError("Could not read image.");
-      setAvatarData("");
-    };
-
-    img.src = objectUrl;
+  const reader = new FileReader();
+  reader.onloadend = () => {
+    setAvatarError("");
+    setAvatarData(reader.result); 
   };
+  reader.readAsDataURL(file);
+};
+
 
   const handleSubmit = (e) => {
     e.preventDefault();
     if (!isFormValid) return;
 
-    // only send password if they typed one
     const newPassword = password.length > 0 ? password : null;
     const newPasswordVerify =
       passwordVerify.length > 0 ? passwordVerify : null;

@@ -133,10 +133,90 @@ async function getLoggedIn(req, res) {
   }
 }
 
+async function updateUser(req, res) {
+  try {
+    const token = req.cookies.token;
+    if (!token) {
+      return res.status(401).json({ success: false, error: "Not logged in" });
+    }
+
+    const payload = verifyToken(token);
+    if (!payload) {
+      return res.status(401).json({ success: false, error: "Invalid token" });
+    }
+
+    const { email, userName, password, passwordVerify, avatar } = req.body;
+
+    if (!email || !userName) {
+      return res
+        .status(400)
+        .json({ success: false, error: "Email and user name are required." });
+    }
+
+    const existing = await User.findOne({ email, _id: { $ne: payload.id } });
+    if (existing) {
+      return res
+        .status(400)
+        .json({ success: false, error: "Email already used" });
+    }
+
+    const user = await User.findById(payload.id);
+    if (!user) {
+      return res
+        .status(404)
+        .json({ success: false, error: "User not found" });
+    }
+
+    user.email = email;
+    user.userName = userName;
+
+    if (avatar) {
+      user.avatar = avatar;
+    }
+
+    if (password || passwordVerify) {
+      if (!password || !passwordVerify) {
+        return res.status(400).json({
+          success: false,
+          error: "Both password and confirmation are required.",
+        });
+      }
+      if (password.length < 8) {
+        return res.status(400).json({
+          success: false,
+          error: "Password must be at least 8 characters.",
+        });
+      }
+      if (password !== passwordVerify) {
+        return res
+          .status(400)
+          .json({ success: false, error: "Passwords do not match." });
+      }
+      user.passwordHash = await bcrypt.hash(password, 10);
+    }
+
+    await user.save();
+
+    return res.status(200).json({
+      success: true,
+      user: {
+        email: user.email,
+        userName: user.userName,
+        avatar: user.avatar,
+      },
+    });
+  } catch (err) {
+    console.error("updateUser error:", err);
+    return res
+      .status(500)
+      .json({ success: false, error: "Server error updating account" });
+  }
+}
+
 const logoutUser = (req, res) => {
   res.cookie("token", "", {
     httpOnly: true,
-    expires: new Date(0) // expire immediately
+    expires: new Date(0) 
   });
   return res.status(200).json({ message: "Logged out" });
 };
@@ -146,4 +226,5 @@ module.exports = {
   loginUser,
   getLoggedIn,
   logoutUser,
+  updateUser,
 };
