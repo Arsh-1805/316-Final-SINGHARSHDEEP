@@ -29,8 +29,8 @@ export default function EditAccountScreen() {
     userName: false,
     password: false,
     passwordVerify: false,
-  });   
-  
+  });
+
   useEffect(() => {
     if (auth.user) {
       setEmail(auth.user.email || "");
@@ -73,24 +73,23 @@ export default function EditAccountScreen() {
   const markTouched = (field) => () =>
     setTouched((prev) => ({ ...prev, [field]: true }));
 
-const handleAvatarChange = (e) => {
-  const file = e.target.files[0];
-  if (!file) return;
+  const handleAvatarChange = (e) => {
+    const file = e.target.files[0];
+    if (!file) return;
 
-  if (!file.type.startsWith("image/")) {
-    setAvatarError("Please select an image file.");
-    setAvatarData("");
-    return;
-  }
+    if (!file.type.startsWith("image/")) {
+      setAvatarError("Please select an image file.");
+      setAvatarData("");
+      return;
+    }
 
-  const reader = new FileReader();
-  reader.onloadend = () => {
-    setAvatarError("");
-    setAvatarData(reader.result); 
+    const reader = new FileReader();
+    reader.onloadend = () => {
+      setAvatarError("");
+      setAvatarData(reader.result); 
+    };
+    reader.readAsDataURL(file);
   };
-  reader.readAsDataURL(file);
-};
-
 
   const handleSubmit = (e) => {
     e.preventDefault();
@@ -112,6 +111,7 @@ const handleAvatarChange = (e) => {
   const handleCancel = () => {
     history.push("/");
   };
+
   return (
     <Box sx={{ minHeight: "100vh", bgcolor: "#ffe4ff" }}>
       <CssBaseline />
@@ -149,69 +149,87 @@ const handleAvatarChange = (e) => {
             </Box>
 
             <Box component="form" noValidate onSubmit={handleSubmit}>
-              <Grid container spacing={2}>
-                <Grid item xs={12}>
-                  <TextField
-                    required
-                    fullWidth
-                    id="userName"
-                    label="User Name"
-                    name="userName"
-                    value={userName}
-                    onChange={(e) => setUserName(e.target.value)}
-                    onBlur={markTouched("userName")}
-                    error={Boolean(userNameError)}
-                    helperText={userNameError}
+              <Grid container spacing={2} alignItems="center">
+                <Grid
+                  item
+                  xs={12}
+                  sm={3}
+                  sx={{ display: "flex", justifyContent: "center" }}
+                >
+                  <Avatar
+                    src={avatarData || ""}
+                    alt="Avatar preview"
+                    sx={{ width: 72, height: 72 }}
                   />
                 </Grid>
-                <Grid item xs={12}>
-                  <TextField
-                    required
-                    fullWidth
-                    id="email"
-                    label="Email Address"
-                    name="email"
-                    value={email}
-                    onChange={(e) => setEmail(e.target.value)}
-                    onBlur={markTouched("email")}
-                    error={Boolean(emailError)}
-                    helperText={emailError}
-                  />
+
+                <Grid item xs={12} sm={9}>
+                  <Grid container spacing={2}>
+                    <Grid item xs={12}>
+                      <TextField
+                        required
+                        fullWidth
+                        id="userName"
+                        label="User Name"
+                        name="userName"
+                        value={userName}
+                        onChange={(e) => setUserName(e.target.value)}
+                        onBlur={markTouched("userName")}
+                        error={Boolean(userNameError)}
+                        helperText={userNameError}
+                      />
+                    </Grid>
+                    <Grid item xs={12}>
+                      <TextField
+                        required
+                        fullWidth
+                        id="email"
+                        label="Email Address"
+                        name="email"
+                        value={email}
+                        onChange={(e) => setEmail(e.target.value)}
+                        onBlur={markTouched("email")}
+                        error={Boolean(emailError)}
+                        helperText={emailError}
+                      />
+                    </Grid>
+                    <Grid item xs={12}>
+                      <TextField
+                        fullWidth
+                        name="password"
+                        label="New Password (optional)"
+                        type="password"
+                        id="password"
+                        value={password}
+                        onChange={(e) => setPassword(e.target.value)}
+                        onBlur={markTouched("password")}
+                        error={Boolean(passwordError)}
+                        helperText={passwordError}
+                      />
+                    </Grid>
+                    <Grid item xs={12}>
+                      <TextField
+                        fullWidth
+                        name="passwordVerify"
+                        label="Confirm New Password"
+                        type="password"
+                        id="passwordVerify"
+                        value={passwordVerify}
+                        onChange={(e) => setPasswordVerify(e.target.value)}
+                        onBlur={markTouched("passwordVerify")}
+                        error={Boolean(passwordVerifyError)}
+                        helperText={passwordVerifyError}
+                      />
+                    </Grid>
+                  </Grid>
                 </Grid>
-                <Grid item xs={12}>
-                  <TextField
-                    fullWidth
-                    name="password"
-                    label="New Password (optional)"
-                    type="password"
-                    id="password"
-                    value={password}
-                    onChange={(e) => setPassword(e.target.value)}
-                    onBlur={markTouched("password")}
-                    error={Boolean(passwordError)}
-                    helperText={passwordError}
-                  />
-                </Grid>
-                <Grid item xs={12}>
-                  <TextField
-                    fullWidth
-                    name="passwordVerify"
-                    label="Confirm New Password"
-                    type="password"
-                    id="passwordVerify"
-                    value={passwordVerify}
-                    onChange={(e) => setPasswordVerify(e.target.value)}
-                    onBlur={markTouched("passwordVerify")}
-                    error={Boolean(passwordVerifyError)}
-                    helperText={passwordVerifyError}
-                  />
-                </Grid>
+
                 <Grid item xs={12}>
                   <Typography variant="body2" sx={{ mb: 1 }}>
                     Avatar Image (128 × 128 pixels)
                   </Typography>
                   <Button variant="contained" component="label">
-                    Choose Avatar
+                    CHOOSE AVATAR
                     <input
                       type="file"
                       hidden
@@ -250,14 +268,14 @@ const handleAvatarChange = (e) => {
                   }}
                   disabled={!isFormValid}
                 >
-                  Save
+                  SAVE
                 </Button>
                 <Button
                   variant="outlined"
                   sx={{ px: 4 }}
                   onClick={handleCancel}
                 >
-                  Cancel
+                  CANCEL
                 </Button>
               </Box>
             </Box>

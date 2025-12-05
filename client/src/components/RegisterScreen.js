@@ -50,7 +50,6 @@ export default function RegisterScreen() {
       ? "Passwords do not match."
       : "";
 
-  // NOTE: avatarData is required here so new accounts must choose an avatar
   const isFormValid =
     email &&
     userName.trim().length > 0 &&
@@ -79,7 +78,7 @@ export default function RegisterScreen() {
     const reader = new FileReader();
     reader.onloadend = () => {
       setAvatarError("");
-      setAvatarData(reader.result); // base64 data URL
+      setAvatarData(reader.result); 
     };
     reader.readAsDataURL(file);
   };
@@ -111,7 +110,6 @@ export default function RegisterScreen() {
               bgcolor: "#fffbe6",
             }}
           >
-            {/* Lock icon + title */}
             <Box
               sx={{
                 display: "flex",
@@ -128,11 +126,8 @@ export default function RegisterScreen() {
               </Typography>
             </Box>
 
-            {/* Form */}
             <Box component="form" noValidate onSubmit={handleSubmit}>
-              {/* Avatar preview + fields, side by side on larger screens */}
               <Grid container spacing={2} alignItems="center">
-                {/* Avatar preview on the left, like the PDF */}
                 <Grid
                   item
                   xs={12}
@@ -146,7 +141,6 @@ export default function RegisterScreen() {
                   />
                 </Grid>
 
-                {/* Text fields on the right */}
                 <Grid item xs={12} sm={9}>
                   <Grid container spacing={2}>
                     <Grid item xs={12}>
@@ -216,7 +210,6 @@ export default function RegisterScreen() {
                   </Grid>
                 </Grid>
 
-                {/* Avatar chooser row under fields */}
                 <Grid item xs={12}>
                   <Typography variant="body2" sx={{ mb: 1 }}>
                     Avatar Image (128 × 128 pixels)
@@ -243,7 +236,6 @@ export default function RegisterScreen() {
                 </Grid>
               </Grid>
 
-              {/* Create Account button */}
               <Button
                 type="submit"
                 fullWidth
@@ -259,7 +251,6 @@ export default function RegisterScreen() {
                 Create Account
               </Button>
 
-              {/* Sign In link */}
               <Grid container justifyContent="center">
                 <Grid item>
                   <Typography variant="body2" sx={{ color: "red" }}>
