@@ -1,5 +1,6 @@
 import AppBanner from './AppBanner'
 import EditToolbar from './EditToolbar'
+import EditAccountScreen from './EditAccountScreen'
 import HomeScreen from './HomeScreen'
 import HomeWrapper from './HomeWrapper'
 import ListCard from './PlaylistCard'
@@ -34,4 +35,5 @@ export {
     RegisterScreen,
     SplashScreen,
     Statusbar, 
-    WorkspaceScreen }
+    WorkspaceScreen,
+    EditAccountScreen }

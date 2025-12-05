@@ -133,3 +133,158 @@ export default function EditAccountScreen() {
   const handleCancel = () => {
     history.push("/");
   };
+  return (
+    <Box sx={{ minHeight: "100vh", bgcolor: "#ffe4ff" }}>
+      <CssBaseline />
+      <Container component="main" maxWidth="sm">
+        <Box
+          sx={{
+            mt: 8,
+            display: "flex",
+            flexDirection: "column",
+            alignItems: "center",
+          }}
+        >
+          <Paper
+            elevation={3}
+            sx={{
+              p: 4,
+              width: "100%",
+              bgcolor: "#fffbe6",
+            }}
+          >
+            <Box
+              sx={{
+                display: "flex",
+                flexDirection: "column",
+                alignItems: "center",
+                mb: 2,
+              }}
+            >
+              <Avatar sx={{ m: 1, bgcolor: "secondary.main" }}>
+                <LockOutlinedIcon />
+              </Avatar>
+              <Typography component="h1" variant="h5">
+                Edit Account
+              </Typography>
+            </Box>
+
+            <Box component="form" noValidate onSubmit={handleSubmit}>
+              <Grid container spacing={2}>
+                <Grid item xs={12}>
+                  <TextField
+                    required
+                    fullWidth
+                    id="userName"
+                    label="User Name"
+                    name="userName"
+                    value={userName}
+                    onChange={(e) => setUserName(e.target.value)}
+                    onBlur={markTouched("userName")}
+                    error={Boolean(userNameError)}
+                    helperText={userNameError}
+                  />
+                </Grid>
+                <Grid item xs={12}>
+                  <TextField
+                    required
+                    fullWidth
+                    id="email"
+                    label="Email Address"
+                    name="email"
+                    value={email}
+                    onChange={(e) => setEmail(e.target.value)}
+                    onBlur={markTouched("email")}
+                    error={Boolean(emailError)}
+                    helperText={emailError}
+                  />
+                </Grid>
+                <Grid item xs={12}>
+                  <TextField
+                    fullWidth
+                    name="password"
+                    label="New Password (optional)"
+                    type="password"
+                    id="password"
+                    value={password}
+                    onChange={(e) => setPassword(e.target.value)}
+                    onBlur={markTouched("password")}
+                    error={Boolean(passwordError)}
+                    helperText={passwordError}
+                  />
+                </Grid>
+                <Grid item xs={12}>
+                  <TextField
+                    fullWidth
+                    name="passwordVerify"
+                    label="Confirm New Password"
+                    type="password"
+                    id="passwordVerify"
+                    value={passwordVerify}
+                    onChange={(e) => setPasswordVerify(e.target.value)}
+                    onBlur={markTouched("passwordVerify")}
+                    error={Boolean(passwordVerifyError)}
+                    helperText={passwordVerifyError}
+                  />
+                </Grid>
+                <Grid item xs={12}>
+                  <Typography variant="body2" sx={{ mb: 1 }}>
+                    Avatar Image (128 × 128 pixels)
+                  </Typography>
+                  <Button variant="contained" component="label">
+                    Choose Avatar
+                    <input
+                      type="file"
+                      hidden
+                      accept="image/*"
+                      onChange={handleAvatarChange}
+                    />
+                  </Button>
+                  {avatarData && !avatarError && (
+                    <Typography variant="body2" sx={{ mt: 1 }}>
+                      Image selected ✔
+                    </Typography>
+                  )}
+                  {avatarError && (
+                    <Typography variant="body2" color="error" sx={{ mt: 1 }}>
+                      {avatarError}
+                    </Typography>
+                  )}
+                </Grid>
+              </Grid>
+
+              <Box
+                sx={{
+                  display: "flex",
+                  justifyContent: "center",
+                  mt: 3,
+                  gap: 2,
+                }}
+              >
+                <Button
+                  type="submit"
+                  variant="contained"
+                  sx={{
+                    px: 4,
+                    bgcolor: "#333",
+                    "&:hover": { bgcolor: "#000" },
+                  }}
+                  disabled={!isFormValid}
+                >
+                  Save
+                </Button>
+                <Button
+                  variant="outlined"
+                  sx={{ px: 4 }}
+                  onClick={handleCancel}
+                >
+                  Cancel
+                </Button>
+              </Box>
+            </Box>
+          </Paper>
+        </Box>
+      </Container>
+    </Box>
+  );
+}

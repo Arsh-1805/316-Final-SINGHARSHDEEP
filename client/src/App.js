@@ -9,7 +9,8 @@ import {
     LoginScreen,
     RegisterScreen,
     Statusbar,
-    WorkspaceScreen
+    WorkspaceScreen,
+    EditAccountScreen
 } from './components'
 /*
   This is the entry-point for our application. Notice that we
@@ -28,6 +29,7 @@ const App = () => {
                         <Route path="/login/" exact component={LoginScreen} />
                         <Route path="/register/" exact component={RegisterScreen} />
                         <Route path="/playlist/:id" exact component={WorkspaceScreen} />
+                        <Route path="/account/" exact component={EditAccountScreen} />
                     </Switch>
                     <Statusbar />
                 </GlobalStoreContextProvider>
