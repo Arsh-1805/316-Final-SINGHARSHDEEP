@@ -139,7 +139,7 @@ export default function AppBanner() {
             <Box
                 sx={{
                     width: "100%",
-                    height: "8px",
+                    height: "1px",
                     backgroundColor: "#e0e0e0",
                 }}
             />
