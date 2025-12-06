@@ -10,6 +10,8 @@ import IconButton from '@mui/material/IconButton';
 import Stack from '@mui/material/Stack';
 import SkipPreviousIcon from '@mui/icons-material/SkipPrevious';
 import SkipNextIcon from '@mui/icons-material/SkipNext';
+import PlayArrowIcon from '@mui/icons-material/PlayArrow';
+import PauseIcon from '@mui/icons-material/Pause';
 
 let youTubeAPIReadyPromise = null;
 function loadYouTubeAPI() {
@@ -37,6 +39,7 @@ const PlayPlaylistOverlay = () => {
     const playerContainerRef = useRef(null);
     const playerRef = useRef(null);
     const [playerReady, setPlayerReady] = useState(false);
+    const [isPaused, setIsPaused] = useState(false);
 
     const songs = playlist?.songs || [];
     const currentSong = songs[store.playerSongIndex] || null;
@@ -54,6 +57,7 @@ const PlayPlaylistOverlay = () => {
                     onReady: () => {
                         if (!mounted) return;
                         setPlayerReady(true);
+                        setIsPaused(false);
                         if (currentSong) {
                             playerRef.current.loadVideoById(currentSong.youTubeId);
                         }
@@ -61,6 +65,12 @@ const PlayPlaylistOverlay = () => {
                     onStateChange: (event) => {
                         if (event.data === window.YT.PlayerState.ENDED) {
                             store.playNextSong();
+                        }
+                        else if (event.data === window.YT.PlayerState.PAUSED) {
+                            setIsPaused(true);
+                        }
+                        else if (event.data === window.YT.PlayerState.PLAYING) {
+                            setIsPaused(false);
                         }
                     }
                 },
@@ -84,6 +94,7 @@ const PlayPlaylistOverlay = () => {
     useEffect(() => {
         if (!playerReady || !playerRef.current || !currentSong) return;
         playerRef.current.loadVideoById(currentSong.youTubeId);
+        setIsPaused(false);
     }, [playerReady, currentSong]);
 
     if (!store.playerOverlayActive || !playlist) {
@@ -96,6 +107,15 @@ const PlayPlaylistOverlay = () => {
 
     const handleClose = () => {
         store.closePlayerOverlay();
+    };
+
+    const handleTogglePause = () => {
+        if (!playerRef.current) return;
+        if (isPaused) {
+            playerRef.current.playVideo();
+        } else {
+            playerRef.current.pauseVideo();
+        }
     };
 
     return (
@@ -191,6 +211,9 @@ const PlayPlaylistOverlay = () => {
                     <Box sx={{ display: 'flex', justifyContent: 'center', gap: 2 }}>
                         <IconButton color="primary" onClick={store.playPreviousSong}>
                             <SkipPreviousIcon />
+                        </IconButton>
+                        <IconButton color="primary" onClick={handleTogglePause}>
+                            {isPaused ? <PlayArrowIcon /> : <PauseIcon />}
                         </IconButton>
                         <IconButton color="primary" onClick={store.playNextSong}>
                             <SkipNextIcon />
