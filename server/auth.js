@@ -7,7 +7,19 @@ function signToken(payload) {
 }
 
 function verifyToken(token) {
-  return jwt.verify(token, JWT_SECRET);
+  if (!token) return null;
+  try {
+    return jwt.verify(token, JWT_SECRET);
+  } catch (err) {
+    return null;
+  }
 }
 
-module.exports = { signToken, verifyToken };
+function verifyUser(req) {
+  if (!req || !req.cookies) return null;
+  const payload = verifyToken(req.cookies.token);
+  if (!payload) return null;
+  return payload.id || payload.userId || null;
+}
+
+module.exports = { signToken, verifyToken, verifyUser };

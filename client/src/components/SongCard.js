@@ -1,7 +1,10 @@
 import { useContext } from 'react';
 import { GlobalStoreContext } from '../store';
 import AuthContext from '../auth';
-import Button from '@mui/material/Button';
+import Box from '@mui/material/Box';
+import IconButton from '@mui/material/IconButton';
+import Typography from '@mui/material/Typography';
+import DeleteIcon from '@mui/icons-material/Delete';
 
 function SongCard(props) {
     const { store } = useContext(GlobalStoreContext);
@@ -48,57 +51,88 @@ function SongCard(props) {
     }
 
     /** DOUBLE CLICK TO EDIT — disabled for guests **/
-    function handleClick(event) {
+    function handleDoubleClick() {
         if (isGuest) return;
-
-        if (event.detail === 2) {
-            store.showEditSongModal(index, song);
-        }
+        store.showEditSongModal(index, song);
     }
 
-    let cardClass = "list-card unselected-list-card";
-
     return (
-        <div
+        <Box
             key={index}
             id={'song-' + index + '-card'}
-            className={cardClass}
             draggable={!isGuest}
             onDragStart={handleDragStart}
             onDragOver={handleDragOver}
             onDragEnter={handleDragEnter}
             onDragLeave={handleDragLeave}
             onDrop={handleDrop}
-            onClick={handleClick}
-            style={{
-                opacity: isGuest ? 0.9 : 1,
-                cursor: isGuest ? "default" : "pointer",
+            onDoubleClick={handleDoubleClick}
+            sx={{
+                display: "flex",
+                alignItems: "center",
+                gap: 2,
+                mb: 1.5,
+                px: 2,
+                py: 1.5,
+                borderRadius: 2,
+                border: "2px solid #f7d26a",
+                backgroundColor: "#fff3c4",
+                boxShadow: "0 4px 10px rgba(0,0,0,0.08)",
+                transition: "transform 0.1s ease, box-shadow 0.1s ease",
+                cursor: isGuest ? "default" : "grab",
+                userSelect: "none",
+                "&:active": {
+                    cursor: isGuest ? "default" : "grabbing",
+                    boxShadow: "0 2px 6px rgba(0,0,0,0.15)",
+                },
             }}
         >
-            {index + 1}.{" "}
-            <a
-                id={'song-' + index + '-link'}
-                className="song-link"
-                href={"https://www.youtube.com/watch?v=" + song.youTubeId}
-                target="_blank"
-                rel="noopener noreferrer"
+            <Typography
+                variant="subtitle1"
+                sx={{ fontWeight: "bold", minWidth: 32 }}
             >
-                {song.title} ({song.year}) by {song.artist}
-            </a>
+                {index + 1}.
+            </Typography>
+
+            <Box sx={{ flexGrow: 1 }}>
+                <Typography
+                    id={'song-' + index + '-link'}
+                    component="a"
+                    href={"https://www.youtube.com/watch?v=" + song.youTubeId}
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    sx={{
+                        textDecoration: "none",
+                        color: "#4e342e",
+                        fontWeight: 600,
+                        display: "block",
+                    }}
+                >
+                    {song.title}
+                </Typography>
+                <Typography variant="body2" color="text.secondary">
+                    {song.artist} • {song.year}
+                </Typography>
+            </Box>
 
             {/* REMOVE BUTTON — HIDDEN for guests */}
             {!isGuest && (
-                <Button
-                    sx={{ transform: "translate(-5%, -5%)", width: "5px", height: "30px" }}
-                    variant="contained"
-                    id={"remove-song-" + index}
-                    className="list-card-button"
+                <IconButton
+                    aria-label="delete song"
                     onClick={handleRemoveSong}
+                    id={"remove-song-" + index}
+                    sx={{
+                        color: "#7b1fa2",
+                        backgroundColor: "white",
+                        "&:hover": {
+                            backgroundColor: "#f3e5f5",
+                        },
+                    }}
                 >
-                    {"\u2715"}
-                </Button>
+                    <DeleteIcon />
+                </IconButton>
             )}
-        </div>
+        </Box>
     );
 }
 
