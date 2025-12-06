@@ -92,11 +92,12 @@ const loggedInMenu = (
   </Menu>
 );
 
+    const editingActive = store.workspaceOverlayActive || location.pathname.startsWith("/playlist");
     let editToolbar = "";
     let menu = loggedOutMenu;
     if (auth.loggedIn) {
         menu = loggedInMenu;
-        if (store.currentList) {
+        if (store.currentList && !editingActive) {
             editToolbar = <EditToolbar />;
         }
     }
