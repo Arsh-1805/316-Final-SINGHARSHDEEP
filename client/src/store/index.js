@@ -465,14 +465,29 @@ store.createNewList = async function () {
     }
 
     store.playPlaylist = function (id) {
-        async function asyncPlay(id) {
-            let response = await storeRequestSender.getPlaylistById(id);
-            if (!response?.data?.success) {
-                response = await storeRequestSender.getSharedPlaylistById(id);
-            }
+        async function asyncPlay(playlistId) {
+            let playlist = null;
+            let response = await storeRequestSender.getPlaylistById(playlistId);
             if (response?.data?.success) {
-                let playlist = response.data.playlist;
+                playlist = response.data.playlist;
+            }
+            else {
+                response = await storeRequestSender.getSharedPlaylistById(playlistId);
+                if (response?.data?.success) {
+                    playlist = response.data.playlist;
+                }
+            }
+
+            if (playlist) {
                 store.openPlayerOverlay(playlist, 0);
+                try {
+                    const listenResponse = await storeRequestSender.incrementPlaylistListeners(playlistId);
+                    if (listenResponse?.data?.success) {
+                        store.loadIdNamePairs({ keepCurrentList: true });
+                    }
+                } catch (err) {
+                    console.warn('Failed to increment playlist listeners', err);
+                }
             }
         }
         asyncPlay(id);

@@ -54,6 +54,11 @@ const apis = {
     fetchJSON(`${API_BASE}/playlist/${id}`, {
       method: "DELETE",
     }),
+
+  incrementPlaylistListeners: (id) =>
+    fetchJSON(`${API_BASE}/playlist/${id}/listen`, {
+      method: "POST",
+    }),
 };
 
 export default apis;

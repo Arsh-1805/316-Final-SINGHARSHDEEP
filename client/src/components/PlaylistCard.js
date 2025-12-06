@@ -55,7 +55,7 @@ function PlaylistCard(props) {
     const ownerLabel = idNamePair.ownerName || idNamePair.ownerEmail || 'Unknown';
     const songs = idNamePair.songs || [];
     const summarySongs = useMemo(() => songs.slice(0, 3), [songs]);
-    const listeners = idNamePair.listeners ?? (songs.length * 41 + 37);
+    const listeners = idNamePair.listenerCount ?? 0;
 
     const canCopy = auth.loggedIn;
 

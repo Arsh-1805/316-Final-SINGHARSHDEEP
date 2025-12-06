@@ -28,7 +28,8 @@ async function createPlaylist(req, res) {
             songs,
             owner: user._id,
             ownerEmail: user.email,
-            ownerName: user.userName || user.email
+            ownerName: user.userName || user.email,
+            listenerCount: 0
         });
 
         await playlist.save();
@@ -136,7 +137,8 @@ async function getPlaylistPairs(req, res) {
                 name: playlist.name,
                 ownerEmail,
                 ownerName,
-                songs: playlist.songs || []
+                songs: playlist.songs || [],
+                listenerCount: playlist.listenerCount || 0
             });
         }
 
@@ -227,10 +229,29 @@ async function deletePlaylist(req, res) {
     }
 }
 
+async function incrementPlaylistListeners(req, res) {
+    try {
+        const playlistId = req.params.id;
+        const playlist = await Playlist.findById(playlistId);
+        if (!playlist) {
+            return res.status(404).json({ success: false, errorMessage: 'Playlist not found!' });
+        }
+
+        playlist.listenerCount = (playlist.listenerCount || 0) + 1;
+        await playlist.save();
+
+        return res.status(200).json({ success: true, listenerCount: playlist.listenerCount });
+    } catch (err) {
+        console.warn('incrementPlaylistListeners error:', err);
+        return res.status(500).json({ success: false, errorMessage: 'Could not update listeners' });
+    }
+}
+
 module.exports = {
     createPlaylist,
     getPlaylistById,
     getPlaylistPairs,
     updatePlaylist,
-    deletePlaylist
+    deletePlaylist,
+    incrementPlaylistListeners
 };
