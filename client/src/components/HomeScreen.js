@@ -3,6 +3,7 @@ import { GlobalStoreContext } from '../store';
 import PlaylistCard from './PlaylistCard.js';
 import MUIDeleteModal from './MUIDeleteModal';
 import AuthContext from '../auth';
+import WorkspaceScreen from './WorkspaceScreen';
 
 import AddIcon from '@mui/icons-material/Add';
 import List from '@mui/material/List';
@@ -234,6 +235,25 @@ const HomeScreen = () => {
                     </Box>
                 </Box>
             </Box>
+            {store.workspaceOverlayActive && store.currentList && (
+                <Box
+                    sx={{
+                        position: 'fixed',
+                        top: 64,
+                        left: 0,
+                        right: 0,
+                        bottom: 0,
+                        backgroundColor: 'rgba(0,0,0,0.4)',
+                        zIndex: 2000,
+                        display: 'flex',
+                        justifyContent: 'center',
+                        alignItems: 'flex-start',
+                        p: 4,
+                    }}
+                >
+                    <WorkspaceScreen embedded />
+                </Box>
+            )}
         </div>
     );
 };

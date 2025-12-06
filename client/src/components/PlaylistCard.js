@@ -18,8 +18,7 @@ function PlaylistCard(props) {
     const isOwner =
         auth.loggedIn &&
         auth.user &&
-        idNamePair.ownerEmail &&
-        idNamePair.ownerEmail === auth.user.email;
+        (!idNamePair.ownerEmail || idNamePair.ownerEmail === auth.user.email);
 
     function handleLoadList(event, id) {
         event.preventDefault();
@@ -34,7 +33,8 @@ function PlaylistCard(props) {
 
     function handleEditList(event, id) {
         event.stopPropagation();
-        store.setCurrentList(id);
+        if (!isOwner) return;
+        store.setCurrentList(id, { stayOnHome: true });
     }
 
     function handleCopyList(event, id) {

@@ -15,11 +15,13 @@ import CloseIcon from '@mui/icons-material/HighlightOff';
 import { GlobalStoreContext } from '../store';
 import AuthContext from '../auth';
 
-function WorkspaceScreen() {
+function WorkspaceScreen({ embedded = false }) {
     const { store } = useContext(GlobalStoreContext);
     const { auth } = useContext(AuthContext);
     const history = useHistory();
-    store.history = history;
+    if (!embedded) {
+        store.history = history;
+    }
 
     const isGuest = !auth.loggedIn;
     const [listName, setListName] = useState(store.currentList ? store.currentList.name : "");
@@ -65,10 +67,10 @@ function WorkspaceScreen() {
     };
 
     useEffect(() => {
-        if (!store.currentList) {
+        if (!store.currentList && !embedded) {
             history.push('/playlists');
         }
-    }, [store.currentList, history]);
+    }, [store.currentList, history, embedded]);
 
     if (!store.currentList) {
         return null;
@@ -76,14 +78,21 @@ function WorkspaceScreen() {
 
     return (
         <Box
-            sx={{
-                minHeight: 'calc(100vh - 64px)',
-                bgcolor: '#f5ccff',
-                display: 'flex',
-                justifyContent: 'center',
-                alignItems: 'flex-start',
-                p: 4
-            }}
+            sx={
+                embedded
+                    ? {
+                          width: '100%',
+                          maxWidth: 960,
+                      }
+                    : {
+                          minHeight: 'calc(100vh - 64px)',
+                          bgcolor: '#f5ccff',
+                          display: 'flex',
+                          justifyContent: 'center',
+                          alignItems: 'flex-start',
+                          p: 4,
+                      }
+            }
         >
             <Paper
                 elevation={6}
