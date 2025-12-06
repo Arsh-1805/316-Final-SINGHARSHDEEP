@@ -32,13 +32,17 @@ const HomeScreen = () => {
     const [songTitleFilter, setSongTitleFilter] = useState('');
     const [songArtistFilter, setSongArtistFilter] = useState('');
     const [songYearFilter, setSongYearFilter] = useState('');
-    const [ownerFilter, setOwnerFilter] = useState('mine');
+    const [ownerFilter, setOwnerFilter] = useState(auth.loggedIn ? 'mine' : 'all');
 
     useEffect(() => {
         store.loadIdNamePairs();
         // We only need to fetch once when the screen mounts or when the page reloads.
         // eslint-disable-next-line react-hooks/exhaustive-deps
     }, []);
+
+    useEffect(() => {
+        setOwnerFilter(auth.loggedIn ? 'mine' : 'all');
+    }, [auth.loggedIn]);
 
     function handleCreateNewList() {
         if (!auth.loggedIn) return;
@@ -51,7 +55,7 @@ const HomeScreen = () => {
         setSongTitleFilter('');
         setSongArtistFilter('');
         setSongYearFilter('');
-        setOwnerFilter('mine');
+        setOwnerFilter(auth.loggedIn ? 'mine' : 'all');
     }
 
     const filteredPairs = store.idNamePairs
@@ -67,7 +71,10 @@ const HomeScreen = () => {
             if (ownerFilter === 'mine') {
                 return auth.user && pair.ownerEmail === auth.user.email;
             }
-            return !auth.user || pair.ownerEmail !== auth.user.email;
+            if (ownerFilter === 'others') {
+                return !auth.user || pair.ownerEmail !== auth.user.email;
+            }
+            return true;
         })
         .filter((pair) => {
             const songs = pair.songs || [];
@@ -200,7 +207,7 @@ const HomeScreen = () => {
                             onChange={(e) => setSongYearFilter(e.target.value)}
                         />
 
-                        {auth.loggedIn && (
+                        {auth.loggedIn ? (
                             <ToggleButtonGroup
                                 value={ownerFilter}
                                 exclusive
@@ -212,6 +219,16 @@ const HomeScreen = () => {
                             >
                                 <ToggleButton value="mine">My Playlists</ToggleButton>
                                 <ToggleButton value="others">Others</ToggleButton>
+                                <ToggleButton value="all">All</ToggleButton>
+                            </ToggleButtonGroup>
+                        ) : (
+                            <ToggleButtonGroup
+                                value="all"
+                                exclusive
+                                size="small"
+                                color="secondary"
+                            >
+                                <ToggleButton value="all">All Playlists</ToggleButton>
                             </ToggleButtonGroup>
                         )}
 

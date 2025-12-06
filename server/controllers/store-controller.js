@@ -27,7 +27,8 @@ async function createPlaylist(req, res) {
             name,
             songs,
             owner: user._id,
-            ownerEmail: user.email
+            ownerEmail: user.email,
+            ownerName: user.userName || user.email
         });
 
         await playlist.save();
@@ -92,16 +93,6 @@ async function getPlaylistById(req, res) {
 
 async function getPlaylistPairs(req, res) {
     try {
-        const userId = auth.verifyUser(req);
-        if (!userId) {
-            return res.status(401).json({ success: false, errorMessage: 'UNAUTHORIZED' });
-        }
-
-        const user = await User.findById(userId);
-        if (!user) {
-            return res.status(404).json({ success: false, errorMessage: 'User not found' });
-        }
-
         const ownerCache = new Map();
         const playlists = await Playlist.find({})
             .sort({ updatedAt: -1 })

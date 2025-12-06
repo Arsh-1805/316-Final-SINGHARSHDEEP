@@ -467,7 +467,10 @@ store.createNewList = async function () {
     store.playPlaylist = function (id) {
         async function asyncPlay(id) {
             let response = await storeRequestSender.getPlaylistById(id);
-            if (response.data.success) {
+            if (!response?.data?.success) {
+                response = await storeRequestSender.getSharedPlaylistById(id);
+            }
+            if (response?.data?.success) {
                 let playlist = response.data.playlist;
                 store.openPlayerOverlay(playlist, 0);
             }
