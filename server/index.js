@@ -24,7 +24,8 @@ app.use(express.json());
 app.use(cookieParser());
 
 app.use("/auth", authRouter);
-app.use("/api", playlistRouter);
+
+app.use("/playlist", playlistRouter);
 
 const PORT = process.env.PORT || 4000;
 

@@ -1,4 +1,5 @@
 import { useContext, useEffect, useState } from 'react';
+import {useHistory} from 'react-router-dom';
 import { GlobalStoreContext } from '../store';
 import PlaylistCard from './PlaylistCard.js';
 import MUIDeleteModal from './MUIDeleteModal';
@@ -23,8 +24,8 @@ import Divider from '@mui/material/Divider';
 const HomeScreen = () => {
     const { store } = useContext(GlobalStoreContext);
     const { auth } = useContext(AuthContext);
+    const history = useHistory(); 
 
-    // simple text filter by playlist name (Use Case 2.12: Find Playlist)
     const [nameFilter, setNameFilter] = useState('');
 
     useEffect(() => {
@@ -32,7 +33,6 @@ const HomeScreen = () => {
     }, [store]);
 
     function handleCreateNewList() {
-        // Guests should not be able to create playlists
         if (!auth.loggedIn) return;
         store.createNewList();
     }
@@ -41,7 +41,6 @@ const HomeScreen = () => {
         setNameFilter('');
     }
 
-    // Filter playlists by name (case-insensitive)
     const filteredPairs = store.idNamePairs.filter((pair) =>
         pair.name.toLowerCase().includes(nameFilter.toLowerCase())
     );
@@ -66,7 +65,6 @@ const HomeScreen = () => {
                     />
                 ))}
 
-                {/* bottom FAB – only when logged in */}
                 {auth.loggedIn && (
                     <Fab
                         sx={{ mt: 2, alignSelf: 'center' }}
@@ -87,14 +85,13 @@ const HomeScreen = () => {
             <Box
                 sx={{
                     minHeight: 'calc(100vh - 64px)',
-                    bgcolor: '#ffe4ff', // pink background like PDF
+                    bgcolor: '#ffe4ff', 
                     display: 'flex',
                     justifyContent: 'center',
                     alignItems: 'flex-start',
                     p: 4,
                 }}
             >
-                {/* Outer container that mimics the big yellow panel */}
                 <Box
                     sx={{
                         display: 'flex',
@@ -104,7 +101,6 @@ const HomeScreen = () => {
                         gap: 3,
                     }}
                 >
-                    {/* LEFT: Search / filter panel (like PDF 3.6) */}
                     <Box
                         sx={{
                             width: '32%',
@@ -132,8 +128,6 @@ const HomeScreen = () => {
                             value={nameFilter}
                             onChange={(e) => setNameFilter(e.target.value)}
                         />
-                        {/* These extra fields are mostly visual, to match the fig.
-                           You can wire them into more advanced search later. */}
                         <TextField
                             label="by User Name"
                             variant="outlined"
@@ -201,7 +195,6 @@ const HomeScreen = () => {
                             flexDirection: 'column',
                         }}
                     >
-                        {/* Header row: sort + count + top FAB (like PDF) */}
                         <Box
                             sx={{
                                 display: 'flex',
@@ -212,7 +205,6 @@ const HomeScreen = () => {
                         >
                             <Box sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
                                 <Typography variant="subtitle1">Sort:</Typography>
-                                {/* Sort link placeholder for now (Use Case 2.13 later) */}
                                 <Typography
                                     variant="subtitle1"
                                     sx={{ color: '#303f9f', cursor: 'pointer' }}

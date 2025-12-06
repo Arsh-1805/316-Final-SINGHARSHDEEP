@@ -1,152 +1,86 @@
-const Playlist = require("../models/playlist-model");
-const User = require("../models/user-model");
+const Playlist = require('../models/playlist-model');
+const User = require('../models/user-model');
+const { verifyToken } = require('../auth');
 
-
-async function getPlaylistPairs(req, res) {
-  try {
-    const user = await User.findById(req.userId);
-    if (!user) {
-      return res
-        .status(401)
-        .json({ success: false, message: "User not found" });
-    }
-
-    const playlists = await Playlist.find({ ownerEmail: user.email });
-
-    const idNamePairs = playlists.map((pl) => ({
-      _id: pl._id,
-      name: pl.name,
-      ownerEmail: pl.ownerEmail,
-    }));
-
-    return res.status(200).json({ success: true, idNamePairs });
-  } catch (err) {
-    console.error("getPlaylistPairs error:", err);
-    return res
-      .status(500)
-      .json({ success: false, message: "Error getting playlist pairs" });
-  }
-}
-
-/**
- * GET /api/playlist/:id
- */
-async function getPlaylistById(req, res) {
-  try {
-    const { id } = req.params;
-    const playlist = await Playlist.findById(id);
-    if (!playlist) {
-      return res
-        .status(404)
-        .json({ success: false, message: "Playlist not found" });
-    }
-    return res.status(200).json({ success: true, playlist });
-  } catch (err) {
-    console.error("getPlaylistById error:", err);
-    return res
-      .status(500)
-      .json({ success: false, message: "Error getting playlist" });
-  }
-}
-
-/**
- * POST /store/playlist
- * client/src/store/requests/index.js is sending:
- * body: { name, ownerEmail, songs: [] }
- * We will prefer the logged-in user over the ownerEmail from the body.
- */
 async function createPlaylist(req, res) {
-  try {
-    const user = await User.findById(req.userId);
-    if (!user) {
-      return res
-        .status(401)
-        .json({ success: false, message: "User not found" });
+    try {
+        const token = req.cookies.token;
+        const payload = verifyToken(token);
+
+        if (!payload)
+            return res.status(401).json({ success: false, error: "Not logged in" });
+
+        const user = await User.findById(payload.id);
+        if (!user)
+            return res.status(404).json({ success: false, error: "User not found" });
+
+        const count = await Playlist.countDocuments({
+            owner: user._id,
+            name: /Untitled/i
+        });
+
+        const name = `Untitled${count + 1}`;
+
+        const playlist = new Playlist({
+            name,
+            owner: user._id,
+            songs: []
+        });
+
+        await playlist.save();
+
+        return res.status(201).json({
+            success: true,
+            id: playlist._id,
+            name: playlist.name
+        });
     }
-
-    const { name, songs = [] } = req.body;
-
-    const playlist = new Playlist({
-      name: name || "Untitled",
-      ownerEmail: user.email,
-      ownerUserName: `${user.firstName} ${user.lastName}`,
-      songs,
-    });
-
-    await playlist.save();
-
-    return res.status(201).json({ success: true, playlist });
-  } catch (err) {
-    console.error("createPlaylist error:", err);
-    return res
-      .status(500)
-      .json({ success: false, message: "Error creating playlist" });
-  }
+    catch (err) {
+        console.error("createPlaylist error:", err);
+        return res.status(500).json({ success: false, error: "Server error" });
+    }
 }
 
-/**
- * PUT /store/playlist/:id
- * client sends: body: { playlist: {...} }
- */
-async function updatePlaylist(req, res) {
-  try {
-    const { id } = req.params;
-    const { playlist: bodyPlaylist } = req.body;
+async function getPlaylistById(req, res) {
+    try {
+        const playlist = await Playlist.findById(req.params.id);
+        if (!playlist)
+            return res.status(404).json({ success: false, error: "Playlist not found" });
 
-    if (!bodyPlaylist) {
-      return res
-        .status(400)
-        .json({ success: false, message: "playlist data missing" });
+        return res.status(200).json({
+            success: true,
+            playlist
+        });
     }
-
-    const playlist = await Playlist.findById(id);
-    if (!playlist) {
-      return res
-        .status(404)
-        .json({ success: false, message: "Playlist not found" });
+    catch (err) {
+        console.error("getPlaylistById error:", err);
+        return res.status(500).json({ success: false, error: "Server error" });
     }
-
-    playlist.name = bodyPlaylist.name;
-    playlist.songs = bodyPlaylist.songs;
-
-    await playlist.save();
-
-    return res.status(200).json({ success: true, playlist });
-  } catch (err) {
-    console.error("updatePlaylist error:", err);
-    return res
-      .status(500)
-      .json({ success: false, message: "Error updating playlist" });
-  }
 }
 
-/**
- * DELETE /store/playlist/:id
- */
-async function deletePlaylist(req, res) {
-  try {
-    const { id } = req.params;
-    const playlist = await Playlist.findById(id);
-    if (!playlist) {
-      return res
-        .status(404)
-        .json({ success: false, message: "Playlist not found" });
-    }
+async function getUserPlaylists(req, res) {
+    try {
+        const token = req.cookies.token;
+        const payload = verifyToken(token);
 
-    await Playlist.deleteOne({ _id: id });
-    return res.status(200).json({ success: true });
-  } catch (err) {
-    console.error("deletePlaylist error:", err);
-    return res
-      .status(500)
-      .json({ success: false, message: "Error deleting playlist" });
-  }
+        if (!payload)
+            return res.status(200).json({ success: true, playlists: [] });
+
+        const playlists = await Playlist.find({ owner: payload.id });
+
+        return res.status(200).json({
+            success: true,
+            playlists
+        });
+    }
+    catch (err) {
+        console.error("getUserPlaylists error:", err);
+        return res.status(500).json({ success: false, error: "Server error" });
+    }
 }
 
 module.exports = {
-  getPlaylistPairs,
-  getPlaylistById,
-  createPlaylist,
-  updatePlaylist,
-  deletePlaylist,
+    createPlaylist,
+    getPlaylistById,
+    getUserPlaylists
 };
