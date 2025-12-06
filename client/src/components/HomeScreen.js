@@ -13,8 +13,10 @@ import TextField from '@mui/material/TextField';
 import Typography from '@mui/material/Typography';
 import Button from '@mui/material/Button';
 import Divider from '@mui/material/Divider';
-import ToggleButton from '@mui/material/ToggleButton';
-import ToggleButtonGroup from '@mui/material/ToggleButtonGroup';
+import IconButton from '@mui/material/IconButton';
+import InputAdornment from '@mui/material/InputAdornment';
+import ClearIcon from '@mui/icons-material/Clear';
+import SearchIcon from '@mui/icons-material/Search';
 
 /*
     Playlists screen. Lists all playlists owned by the user
@@ -40,10 +42,6 @@ const HomeScreen = () => {
         // eslint-disable-next-line react-hooks/exhaustive-deps
     }, []);
 
-    useEffect(() => {
-        setOwnerFilter(auth.loggedIn ? 'mine' : 'all');
-    }, [auth.loggedIn]);
-
     function handleCreateNewList() {
         if (!auth.loggedIn) return;
         store.createNewList();
@@ -58,6 +56,17 @@ const HomeScreen = () => {
         setOwnerFilter(auth.loggedIn ? 'mine' : 'all');
     }
 
+    useEffect(() => {
+        setOwnerFilter(auth.loggedIn ? 'mine' : 'all');
+    }, [auth.loggedIn]);
+
+    const searchActive =
+        nameFilter.trim() ||
+        ownerNameFilter.trim() ||
+        songTitleFilter.trim() ||
+        songArtistFilter.trim() ||
+        songYearFilter.trim();
+
     const filteredPairs = store.idNamePairs
         .filter((pair) =>
             pair.name.toLowerCase().includes(nameFilter.toLowerCase())
@@ -68,6 +77,7 @@ const HomeScreen = () => {
             return ownerDisplay.includes(ownerNameFilter.toLowerCase());
         })
         .filter((pair) => {
+            if (searchActive) return true;
             if (ownerFilter === 'mine') {
                 return auth.user && pair.ownerEmail === auth.user.email;
             }
@@ -173,6 +183,15 @@ const HomeScreen = () => {
                             fullWidth
                             value={nameFilter}
                             onChange={(e) => setNameFilter(e.target.value)}
+                            InputProps={{
+                                endAdornment: nameFilter ? (
+                                    <InputAdornment position="end">
+                                        <IconButton size="small" onClick={() => setNameFilter('')}>
+                                            <ClearIcon fontSize="small" />
+                                        </IconButton>
+                                    </InputAdornment>
+                                ) : null
+                            }}
                         />
                         <TextField
                             label="by User Name"
@@ -181,6 +200,15 @@ const HomeScreen = () => {
                             fullWidth
                             value={ownerNameFilter}
                             onChange={(e) => setOwnerNameFilter(e.target.value)}
+                            InputProps={{
+                                endAdornment: ownerNameFilter ? (
+                                    <InputAdornment position="end">
+                                        <IconButton size="small" onClick={() => setOwnerNameFilter('')}>
+                                            <ClearIcon fontSize="small" />
+                                        </IconButton>
+                                    </InputAdornment>
+                                ) : null
+                            }}
                         />
                         <TextField
                             label="by Song Title"
@@ -189,6 +217,15 @@ const HomeScreen = () => {
                             fullWidth
                             value={songTitleFilter}
                             onChange={(e) => setSongTitleFilter(e.target.value)}
+                            InputProps={{
+                                endAdornment: songTitleFilter ? (
+                                    <InputAdornment position="end">
+                                        <IconButton size="small" onClick={() => setSongTitleFilter('')}>
+                                            <ClearIcon fontSize="small" />
+                                        </IconButton>
+                                    </InputAdornment>
+                                ) : null
+                            }}
                         />
                         <TextField
                             label="by Song Artist"
@@ -197,6 +234,15 @@ const HomeScreen = () => {
                             fullWidth
                             value={songArtistFilter}
                             onChange={(e) => setSongArtistFilter(e.target.value)}
+                            InputProps={{
+                                endAdornment: songArtistFilter ? (
+                                    <InputAdornment position="end">
+                                        <IconButton size="small" onClick={() => setSongArtistFilter('')}>
+                                            <ClearIcon fontSize="small" />
+                                        </IconButton>
+                                    </InputAdornment>
+                                ) : null
+                            }}
                         />
                         <TextField
                             label="by Song Year"
@@ -205,32 +251,16 @@ const HomeScreen = () => {
                             fullWidth
                             value={songYearFilter}
                             onChange={(e) => setSongYearFilter(e.target.value)}
+                            InputProps={{
+                                endAdornment: songYearFilter ? (
+                                    <InputAdornment position="end">
+                                        <IconButton size="small" onClick={() => setSongYearFilter('')}>
+                                            <ClearIcon fontSize="small" />
+                                        </IconButton>
+                                    </InputAdornment>
+                                ) : null
+                            }}
                         />
-
-                        {auth.loggedIn ? (
-                            <ToggleButtonGroup
-                                value={ownerFilter}
-                                exclusive
-                                onChange={(event, value) => {
-                                    if (value !== null) setOwnerFilter(value);
-                                }}
-                                size="small"
-                                color="secondary"
-                            >
-                                <ToggleButton value="mine">My Playlists</ToggleButton>
-                                <ToggleButton value="others">Others</ToggleButton>
-                                <ToggleButton value="all">All</ToggleButton>
-                            </ToggleButtonGroup>
-                        ) : (
-                            <ToggleButtonGroup
-                                value="all"
-                                exclusive
-                                size="small"
-                                color="secondary"
-                            >
-                                <ToggleButton value="all">All Playlists</ToggleButton>
-                            </ToggleButtonGroup>
-                        )}
 
                         <Box
                             sx={{
@@ -241,6 +271,7 @@ const HomeScreen = () => {
                         >
                             <Button
                                 variant="contained"
+                                startIcon={<SearchIcon />}
                                 sx={{
                                     bgcolor: '#6a1b9a',
                                     '&:hover': { bgcolor: '#4a148c' },
@@ -279,6 +310,8 @@ const HomeScreen = () => {
                                 display: 'flex',
                                 alignItems: 'center',
                                 justifyContent: 'space-between',
+                                flexWrap: 'wrap',
+                                gap: 2,
                                 mb: 2,
                             }}
                         >
@@ -292,12 +325,36 @@ const HomeScreen = () => {
                                 </Typography>
                             </Box>
 
+                            <Box sx={{ display: 'flex', gap: 1 }}>
+                                {[
+                                    { value: 'mine', label: 'My Playlists', disabled: !auth.loggedIn },
+                                    { value: 'others', label: 'Others', disabled: !auth.loggedIn },
+                                    { value: 'all', label: 'All', disabled: false },
+                                ].map((option) => (
+                                    <Button
+                                        key={option.value}
+                                        variant={ownerFilter === option.value ? 'contained' : 'outlined'}
+                                        sx={{
+                                            textTransform: 'none',
+                                            bgcolor: ownerFilter === option.value ? '#6a1b9a' : 'transparent',
+                                            color: ownerFilter === option.value ? '#fff' : '#6a1b9a',
+                                            borderColor: '#6a1b9a',
+                                            '&:hover': {
+                                                bgcolor: ownerFilter === option.value ? '#4a148c' : 'rgba(106,27,154,0.08)'
+                                            }
+                                        }}
+                                        disabled={option.disabled}
+                                        onClick={() => setOwnerFilter(option.value)}
+                                    >
+                                        {option.label}
+                                    </Button>
+                                ))}
+                            </Box>
+
                             <Typography variant="subtitle1">
                                 {filteredPairs.length}{' '}
                                 {filteredPairs.length === 1 ? 'Playlist' : 'Playlists'}
                             </Typography>
-
-                            
                         </Box>
 
                         <Divider sx={{ mb: 2 }} />
