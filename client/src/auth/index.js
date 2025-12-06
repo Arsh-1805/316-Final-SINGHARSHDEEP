@@ -10,12 +10,14 @@ export const AuthActionType = {
   LOGOUT_USER: "LOGOUT_USER",
   REGISTER_USER: "REGISTER_USER",
   UPDATE_USER: "UPDATE_USER",
+  SET_GUEST: "SET_GUEST",
 };
 
 function AuthContextProvider(props) {
   const [auth, setAuth] = useState({
     user: null,
     loggedIn: false,
+    isGuest: false,
     errorMessage: null,
   });
   const history = useHistory();
@@ -32,12 +34,14 @@ function AuthContextProvider(props) {
           user: payload.user,
           loggedIn: payload.loggedIn,
           errorMessage: null,
+          isGuest: false,
         });
       }
       case AuthActionType.LOGIN_USER: {
         return setAuth({
           user: payload.user,
           loggedIn: payload.loggedIn,
+          isGuest: false,
           errorMessage: payload.errorMessage,
         });
       }
@@ -45,6 +49,7 @@ function AuthContextProvider(props) {
         return setAuth({
           user: null,
           loggedIn: false,
+          isGuest: false,
           errorMessage: null,
         });
       }
@@ -52,6 +57,7 @@ function AuthContextProvider(props) {
         return setAuth({
           user: payload.user,
           loggedIn: payload.loggedIn,
+          isGuest: false,
           errorMessage: payload.errorMessage,
         });
       }
@@ -59,9 +65,18 @@ function AuthContextProvider(props) {
       return setAuth({
         user: payload.user,
         loggedIn: true,
+        isGuest: false,
         errorMessage: payload.errorMessage,
       });
     }
+      case AuthActionType.SET_GUEST: {
+        return setAuth({
+          user: null,
+          loggedIn: false,
+          isGuest: true,
+          errorMessage: null,
+        });
+      }
       default:
         return auth;
     }
@@ -75,6 +90,7 @@ function AuthContextProvider(props) {
         payload: {
           loggedIn: response.data.loggedIn,
           user: response.data.user,
+          isGuest: false,
         },
       });
     }
@@ -141,6 +157,7 @@ auth.registerUser = async function (
             user: response.data.user,
             loggedIn: true,
             errorMessage: null,
+            isGuest: false,
           },
         });
         history.push("/");
@@ -151,6 +168,7 @@ auth.registerUser = async function (
             user: auth.user,
             loggedIn: false,
             errorMessage: response.data.errorMessage || "Login failed.",
+            isGuest: false,
           },
         });
       }
@@ -160,22 +178,31 @@ auth.registerUser = async function (
         payload: {
           user: auth.user,
           loggedIn: false,
-          errorMessage: "Login failed.",
-        },
-      });
+            errorMessage: "Login failed.",
+            isGuest: false,
+          },
+        });
     }
   };
 
   auth.logoutUser = async function () {
   const response = await authRequestSender.logoutUser();
-  if (response.status === 200) {
+    if (response.status === 200) {
+      authReducer({
+        type: AuthActionType.LOGOUT_USER,
+        payload: null,
+      });
+      history.push("/");
+    }
+  };
+
+  auth.setGuestUser = function () {
     authReducer({
-      type: AuthActionType.LOGOUT_USER,
+      type: AuthActionType.SET_GUEST,
       payload: null,
     });
-    history.push("/");
-  }
-};
+    history.push("/playlists");
+  };
 
 auth.getUserInitials = function () {
   if (!auth.user) return "";

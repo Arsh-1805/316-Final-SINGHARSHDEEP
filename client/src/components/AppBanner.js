@@ -1,5 +1,5 @@
 import { useContext, useState } from 'react';
-import { Link, useHistory } from 'react-router-dom'
+import { Link, useHistory, useLocation } from 'react-router-dom'
 import AuthContext from '../auth';
 import { GlobalStoreContext } from '../store'
 
@@ -22,6 +22,10 @@ export default function AppBanner() {
     const [anchorEl, setAnchorEl] = useState(null);
     const isMenuOpen = Boolean(anchorEl);
     const history = useHistory();
+    const location = useLocation();
+    const guestRoutes = ["/home", "/playlists", "/playlist", "/songs"];
+    const isGuestRoute = guestRoutes.some(path => location.pathname.startsWith(path));
+    const showLibraryLinks = auth.loggedIn || (auth.isGuest && isGuestRoute);
 
     const handleProfileMenuOpen = (event) => {
         setAnchorEl(event.currentTarget);
@@ -146,15 +150,16 @@ function getAccountMenu(loggedIn) {
                             gap: 2,
                             }}
                         >
-                        <Button color="inherit" onClick={() => history.push("/")}>
-                         Home
-                        </Button>
-                        <Button color="inherit" onClick={() => history.push("/playlists")}>
-                        Playlists
-                        </Button>
-                        <Button color="inherit" onClick={() => history.push("/songs")}>
-                        Songs Catalog
-                        </Button>
+                        {showLibraryLinks && (
+                            <>
+                                <Button color="inherit" onClick={() => history.push("/playlists")}>
+                                    Playlists
+                                </Button>
+                                <Button color="inherit" onClick={() => history.push("/songs")}>
+                                    Songs Catalog
+                                </Button>
+                            </>
+                        )}
                         </Box>
                     <Box sx={{ flexGrow: 1 }}>{editToolbar}</Box>
                     <Box sx={{ height: "64px", display: { xs: "none", md: "flex" } }}>
