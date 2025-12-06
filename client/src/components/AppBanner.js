@@ -1,5 +1,5 @@
 import { useContext, useState } from 'react';
-import { Link, useHistory, useLocation } from 'react-router-dom'
+import { Link as RouterLink, useHistory, useLocation } from 'react-router-dom'
 import AuthContext from '../auth';
 import { GlobalStoreContext } from '../store'
 
@@ -25,7 +25,11 @@ export default function AppBanner() {
     const location = useLocation();
     const guestRoutes = ["/home", "/playlists", "/playlist", "/songs"];
     const isGuestRoute = guestRoutes.some(path => location.pathname.startsWith(path));
-    const showLibraryLinks = auth.loggedIn || (auth.isGuest && isGuestRoute);
+    const hideForLoggedUsers = ["/account"];
+    const isHiddenRouteForUser = hideForLoggedUsers.some(path => location.pathname.startsWith(path));
+    const showLibraryLinks =
+        (auth.loggedIn && !isHiddenRouteForUser) ||
+        (auth.isGuest && isGuestRoute);
 
     const handleProfileMenuOpen = (event) => {
         setAnchorEl(event.currentTarget);
@@ -61,8 +65,8 @@ export default function AppBanner() {
             open={isMenuOpen}
             onClose={handleMenuClose}
         >
-            <MenuItem onClick={handleMenuClose}><Link to='/login/'>Login</Link></MenuItem>
-            <MenuItem onClick={handleMenuClose}><Link to='/register/'>Create New Account</Link></MenuItem>
+            <MenuItem onClick={handleMenuClose}><RouterLink to='/login/'>Login</RouterLink></MenuItem>
+            <MenuItem onClick={handleMenuClose}><RouterLink to='/register/'>Create New Account</RouterLink></MenuItem>
         </Menu>
     );
 
@@ -134,13 +138,13 @@ function getAccountMenu(loggedIn) {
                         component="div"
                         sx={{ display: { xs: "none", sm: "block" } }}
                     >
-                        <Link
+                        <RouterLink
                             onClick={handleHouseClick}
                             style={{ textDecoration: "none", color: "white" }}
                             to="/"
                         >
                             ⌂
-                        </Link>
+                        </RouterLink>
                     </Typography>
                       <Box
                         sx={{
@@ -152,10 +156,18 @@ function getAccountMenu(loggedIn) {
                         >
                         {showLibraryLinks && (
                             <>
-                                <Button color="inherit" onClick={() => history.push("/playlists")}>
+                                <Button
+                                    color="inherit"
+                                    component={RouterLink}
+                                    to="/playlists"
+                                >
                                     Playlists
                                 </Button>
-                                <Button color="inherit" onClick={() => history.push("/songs")}>
+                                <Button
+                                    color="inherit"
+                                    component={RouterLink}
+                                    to="/songs"
+                                >
                                     Songs Catalog
                                 </Button>
                             </>
