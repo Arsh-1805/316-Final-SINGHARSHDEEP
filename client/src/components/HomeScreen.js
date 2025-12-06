@@ -13,6 +13,8 @@ import TextField from '@mui/material/TextField';
 import Typography from '@mui/material/Typography';
 import Button from '@mui/material/Button';
 import Divider from '@mui/material/Divider';
+import ToggleButton from '@mui/material/ToggleButton';
+import ToggleButtonGroup from '@mui/material/ToggleButtonGroup';
 
 /*
     Playlists screen. Lists all playlists owned by the user
@@ -26,6 +28,7 @@ const HomeScreen = () => {
     const { auth } = useContext(AuthContext);
 
     const [nameFilter, setNameFilter] = useState('');
+    const [ownerFilter, setOwnerFilter] = useState('all');
 
     useEffect(() => {
         store.loadIdNamePairs();
@@ -42,9 +45,19 @@ const HomeScreen = () => {
         setNameFilter('');
     }
 
-    const filteredPairs = store.idNamePairs.filter((pair) =>
-        pair.name.toLowerCase().includes(nameFilter.toLowerCase())
-    );
+    const filteredPairs = store.idNamePairs
+        .filter((pair) =>
+            pair.name.toLowerCase().includes(nameFilter.toLowerCase())
+        )
+        .filter((pair) => {
+            if (ownerFilter === 'mine') {
+                return auth.user && pair.ownerEmail === auth.user.email;
+            }
+            if (ownerFilter === 'others') {
+                return !auth.user || pair.ownerEmail !== auth.user.email;
+            }
+            return true;
+        });
 
     let listCard = '';
     if (store) {
@@ -141,6 +154,20 @@ const HomeScreen = () => {
                             size="small"
                             fullWidth
                         />
+
+                        <ToggleButtonGroup
+                            value={ownerFilter}
+                            exclusive
+                            onChange={(event, value) => {
+                                if (value !== null) setOwnerFilter(value);
+                            }}
+                            size="small"
+                            color="secondary"
+                        >
+                            <ToggleButton value="all">All</ToggleButton>
+                            <ToggleButton value="mine">My Playlists</ToggleButton>
+                            <ToggleButton value="others">Others</ToggleButton>
+                        </ToggleButtonGroup>
 
                         <Box
                             sx={{

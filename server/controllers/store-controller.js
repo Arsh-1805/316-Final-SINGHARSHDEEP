@@ -102,24 +102,26 @@ async function getPlaylistPairs(req, res) {
             return res.status(404).json({ success: false, errorMessage: 'User not found' });
         }
 
-        const playlists = await Playlist.find({
-            $or: [
-                { ownerEmail: user.email },
-                { owner: user._id },
-                { _id: { $in: user.playlists || [] } }
-            ]
-        }).sort({ updatedAt: -1 });
+        const playlists = await Playlist.find({})
+            .sort({ updatedAt: -1 })
+            .limit(200);
 
         const idNamePairs = [];
         for (const playlist of playlists) {
             let updated = false;
-            if (!playlist.ownerEmail) {
-                playlist.ownerEmail = user.email;
-                updated = true;
+            if (!playlist.ownerEmail && playlist.owner) {
+                const ownerUser = await User.findById(playlist.owner);
+                if (ownerUser) {
+                    playlist.ownerEmail = ownerUser.email;
+                    updated = true;
+                }
             }
-            if (!playlist.owner) {
-                playlist.owner = user._id;
-                updated = true;
+            if (!playlist.owner && playlist.ownerEmail) {
+                const ownerUser = await User.findOne({ email: playlist.ownerEmail });
+                if (ownerUser) {
+                    playlist.owner = ownerUser._id;
+                    updated = true;
+                }
             }
             if (updated) {
                 await playlist.save();
@@ -127,7 +129,8 @@ async function getPlaylistPairs(req, res) {
             idNamePairs.push({
                 _id: playlist._id,
                 name: playlist.name,
-                ownerEmail: playlist.ownerEmail || user.email
+                ownerEmail: playlist.ownerEmail || "",
+                ownerName: playlist.ownerName || ""
             });
         }
 
