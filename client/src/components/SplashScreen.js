@@ -26,15 +26,6 @@ export default function SplashScreen() {
           <button className="splash-btn" onClick={() => history.push("/register")}>
             Create Account
           </button>
-          <button onClick={handleContinueAsGuest}>
-            Continue as Guest
-            </button>
-          <button onClick={handleLogin}>
-            Login
-            </button>
-          <button onClick={handleCreate}>
-            Create Account
-            </button>
         </div>
       </div>
     </div>
