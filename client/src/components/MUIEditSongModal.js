@@ -12,12 +12,10 @@ const style1 = {
     top: '50%',
     left: '50%',
     transform: 'translate(-50%, -50%)',
-    width: 345,
-    height: 250,
-    backgroundSize: "contain",
-    backgroundImage: `url(https://i.insider.com/602ee9ced3ad27001837f2ac?})`,
-    border: '3px solid #000',
-    padding: '20px',
+    width: 420,
+    bgcolor: 'background.paper',
+    borderRadius: 2,
+    p: 4,
     boxShadow: 24,
 };
 
