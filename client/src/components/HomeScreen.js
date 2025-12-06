@@ -28,6 +28,10 @@ const HomeScreen = () => {
     const { auth } = useContext(AuthContext);
 
     const [nameFilter, setNameFilter] = useState('');
+    const [ownerNameFilter, setOwnerNameFilter] = useState('');
+    const [songTitleFilter, setSongTitleFilter] = useState('');
+    const [songArtistFilter, setSongArtistFilter] = useState('');
+    const [songYearFilter, setSongYearFilter] = useState('');
     const [ownerFilter, setOwnerFilter] = useState('all');
 
     useEffect(() => {
@@ -43,11 +47,19 @@ const HomeScreen = () => {
 
     function handleClearFilters() {
         setNameFilter('');
+        setOwnerNameFilter('');
+        setSongTitleFilter('');
+        setSongArtistFilter('');
+        setSongYearFilter('');
+        setOwnerFilter('all');
     }
 
     const filteredPairs = store.idNamePairs
         .filter((pair) =>
             pair.name.toLowerCase().includes(nameFilter.toLowerCase())
+        )
+        .filter((pair) =>
+            pair.ownerName?.toLowerCase().includes(ownerNameFilter.toLowerCase()) || ownerNameFilter.trim() === ''
         )
         .filter((pair) => {
             if (ownerFilter === 'mine') {
@@ -57,6 +69,17 @@ const HomeScreen = () => {
                 return !auth.user || pair.ownerEmail !== auth.user.email;
             }
             return true;
+        })
+        .filter((pair) => {
+            const songs = pair.songs || [];
+            const titleFilter = songTitleFilter.trim().toLowerCase();
+            const artistFilter = songArtistFilter.trim().toLowerCase();
+            const yearFilter = songYearFilter.trim().toLowerCase();
+
+            const matchesTitle = !titleFilter || songs.some(song => (song.title || '').toLowerCase().includes(titleFilter));
+            const matchesArtist = !artistFilter || songs.some(song => (song.artist || '').toLowerCase().includes(artistFilter));
+            const matchesYear = !yearFilter || songs.some(song => (song.year || '').toString().toLowerCase().includes(yearFilter));
+            return matchesTitle && matchesArtist && matchesYear;
         });
 
     let listCard = '';
@@ -135,24 +158,32 @@ const HomeScreen = () => {
                             variant="outlined"
                             size="small"
                             fullWidth
+                            value={ownerNameFilter}
+                            onChange={(e) => setOwnerNameFilter(e.target.value)}
                         />
                         <TextField
                             label="by Song Title"
                             variant="outlined"
                             size="small"
                             fullWidth
+                            value={songTitleFilter}
+                            onChange={(e) => setSongTitleFilter(e.target.value)}
                         />
                         <TextField
                             label="by Song Artist"
                             variant="outlined"
                             size="small"
                             fullWidth
+                            value={songArtistFilter}
+                            onChange={(e) => setSongArtistFilter(e.target.value)}
                         />
                         <TextField
                             label="by Song Year"
                             variant="outlined"
                             size="small"
                             fullWidth
+                            value={songYearFilter}
+                            onChange={(e) => setSongYearFilter(e.target.value)}
                         />
 
                         <ToggleButtonGroup

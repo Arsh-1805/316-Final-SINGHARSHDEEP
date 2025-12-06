@@ -102,35 +102,50 @@ async function getPlaylistPairs(req, res) {
             return res.status(404).json({ success: false, errorMessage: 'User not found' });
         }
 
+        const ownerCache = new Map();
         const playlists = await Playlist.find({})
             .sort({ updatedAt: -1 })
             .limit(200);
 
         const idNamePairs = [];
         for (const playlist of playlists) {
-            let updated = false;
-            if (!playlist.ownerEmail && playlist.owner) {
-                const ownerUser = await User.findById(playlist.owner);
-                if (ownerUser) {
-                    playlist.ownerEmail = ownerUser.email;
-                    updated = true;
+            let ownerEmail = playlist.ownerEmail || "";
+            let ownerName = playlist.ownerName || "";
+            const ownerId = playlist.owner ? playlist.owner.toString() : null;
+
+            async function resolveOwner() {
+                if (ownerId) {
+                    if (!ownerCache.has(ownerId)) {
+                        const ownerUser = await User.findById(ownerId);
+                        ownerCache.set(ownerId, ownerUser);
+                    }
+                    return ownerCache.get(ownerId);
                 }
-            }
-            if (!playlist.owner && playlist.ownerEmail) {
-                const ownerUser = await User.findOne({ email: playlist.ownerEmail });
-                if (ownerUser) {
-                    playlist.owner = ownerUser._id;
-                    updated = true;
+                if (ownerEmail) {
+                    if (!ownerCache.has(ownerEmail)) {
+                        const ownerUser = await User.findOne({ email: ownerEmail });
+                        ownerCache.set(ownerEmail, ownerUser);
+                    }
+                    return ownerCache.get(ownerEmail);
                 }
+                return null;
             }
-            if (updated) {
-                await playlist.save();
+
+            const ownerUser = (!ownerEmail || !ownerName || !ownerId)
+                ? await resolveOwner()
+                : null;
+
+            if (ownerUser) {
+                ownerEmail = ownerEmail || ownerUser.email;
+                ownerName = ownerName || ownerUser.userName || "";
             }
+
             idNamePairs.push({
                 _id: playlist._id,
                 name: playlist.name,
-                ownerEmail: playlist.ownerEmail || "",
-                ownerName: playlist.ownerName || ""
+                ownerEmail,
+                ownerName,
+                songs: playlist.songs || []
             });
         }
 
