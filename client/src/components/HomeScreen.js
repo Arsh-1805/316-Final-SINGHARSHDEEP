@@ -4,6 +4,7 @@ import PlaylistCard from './PlaylistCard.js';
 import MUIDeleteModal from './MUIDeleteModal';
 import AuthContext from '../auth';
 import WorkspaceScreen from './WorkspaceScreen';
+import PlayPlaylistOverlay from './PlayPlaylistOverlay';
 
 import AddIcon from '@mui/icons-material/Add';
 import List from '@mui/material/List';
@@ -252,6 +253,25 @@ const HomeScreen = () => {
                     }}
                 >
                     <WorkspaceScreen embedded />
+                </Box>
+            )}
+            {store.playerOverlayActive && store.playerPlaylist && (
+                <Box
+                    sx={{
+                        position: 'fixed',
+                        top: 64,
+                        left: 0,
+                        right: 0,
+                        bottom: 0,
+                        backgroundColor: 'rgba(0,0,0,0.45)',
+                        zIndex: 2100,
+                        display: 'flex',
+                        justifyContent: 'center',
+                        alignItems: 'flex-start',
+                        p: 4,
+                    }}
+                >
+                    <PlayPlaylistOverlay />
                 </Box>
             )}
         </div>

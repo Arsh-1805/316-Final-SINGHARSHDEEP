@@ -15,6 +15,7 @@ import SongsScreen from './SongsScreen'
 import SplashScreen from './SplashScreen'
 import Statusbar from './Statusbar'
 import WorkspaceScreen from './WorkspaceScreen'
+import PlayPlaylistOverlay from './PlayPlaylistOverlay'
 /*
     This serves as a module so that we can import
     all the other components as we wish.
@@ -38,4 +39,5 @@ export {
     Statusbar, 
     WorkspaceScreen,
     EditAccountScreen,
-    SongsScreen }
+    SongsScreen,
+    PlayPlaylistOverlay }

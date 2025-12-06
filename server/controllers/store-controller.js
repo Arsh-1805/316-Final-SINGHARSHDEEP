@@ -58,8 +58,20 @@ async function getPlaylistById(req, res) {
         }
 
         const user = await User.findById(userId);
-        if (!user || user.email !== playlist.ownerEmail) {
+        if (!user) {
+            return res.status(404).json({ success: false, errorMessage: 'User not found' });
+        }
+
+        const ownsByEmail = playlist.ownerEmail && playlist.ownerEmail === user.email;
+        const ownsById = playlist.owner && playlist.owner.equals(user._id);
+
+        if (!ownsByEmail && !ownsById) {
             return res.status(403).json({ success: false, errorMessage: 'authentication error' });
+        }
+
+        if (!playlist.ownerEmail) {
+            playlist.ownerEmail = user.email;
+            await playlist.save();
         }
 
         return res.status(200).json({ success: true, playlist });
@@ -81,12 +93,25 @@ async function getPlaylistPairs(req, res) {
             return res.status(404).json({ success: false, errorMessage: 'User not found' });
         }
 
-        const playlists = await Playlist.find({ ownerEmail: user.email }).sort({ updatedAt: -1 });
-        const idNamePairs = playlists.map((playlist) => ({
-            _id: playlist._id,
-            name: playlist.name,
-            ownerEmail: playlist.ownerEmail
-        }));
+        const playlists = await Playlist.find({
+            $or: [
+                { ownerEmail: user.email },
+                { owner: user._id }
+            ]
+        }).sort({ updatedAt: -1 });
+
+        const idNamePairs = [];
+        for (const playlist of playlists) {
+            if (!playlist.ownerEmail && playlist.owner && playlist.owner.equals(user._id)) {
+                playlist.ownerEmail = user.email;
+                await playlist.save();
+            }
+            idNamePairs.push({
+                _id: playlist._id,
+                name: playlist.name,
+                ownerEmail: playlist.ownerEmail || user.email
+            });
+        }
 
         return res.status(200).json({ success: true, idNamePairs });
     } catch (err) {
@@ -109,7 +134,10 @@ async function updatePlaylist(req, res) {
         }
 
         const user = await User.findById(userId);
-        if (!user || user.email !== playlist.ownerEmail) {
+        const ownsByEmail = playlist.ownerEmail && playlist.ownerEmail === user.email;
+        const ownsById = playlist.owner && playlist.owner.equals(user._id);
+
+        if (!ownsByEmail && !ownsById) {
             return res.status(403).json({ success: false, errorMessage: 'authentication error' });
         }
 
@@ -143,7 +171,10 @@ async function deletePlaylist(req, res) {
         }
 
         const user = await User.findById(userId);
-        if (!user || user.email !== playlist.ownerEmail) {
+        const ownsByEmail = playlist.ownerEmail && playlist.ownerEmail === user.email;
+        const ownsById = playlist.owner && playlist.owner.equals(user._id);
+
+        if (!ownsByEmail && !ownsById) {
             return res.status(403).json({ success: false, errorMessage: 'authentication error' });
         }
 
