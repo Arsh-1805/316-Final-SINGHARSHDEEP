@@ -35,7 +35,8 @@ export const GlobalStoreActionType = {
     HIDE_MODALS: "HIDE_MODALS",
     SET_PLAYER_OVERLAY: "SET_PLAYER_OVERLAY",
     SET_PLAYER_SONG: "SET_PLAYER_SONG",
-    CLOSE_PLAYER_OVERLAY: "CLOSE_PLAYER_OVERLAY"
+    CLOSE_PLAYER_OVERLAY: "CLOSE_PLAYER_OVERLAY",
+    MARK_PLAYLIST_ACCESSED: "MARK_PLAYLIST_ACCESSED"
 }
 
 // WE'LL NEED THIS TO PROCESS TRANSACTIONS
@@ -47,6 +48,30 @@ const CurrentModal = {
     EDIT_SONG : "EDIT_SONG",
     ERROR : "ERROR"
 }
+
+const MAX_RECENT_PLAYLISTS = 8;
+
+const addPlaylistToRecents = (recents, playlist) => {
+    if (!playlist || !playlist._id) return recents;
+    const entry = {
+        _id: playlist._id,
+        name: playlist.name,
+        ownerEmail: playlist.ownerEmail,
+        ownerName: playlist.ownerName
+    };
+    const filtered = recents.filter((item) => item._id !== entry._id);
+    filtered.unshift(entry);
+    return filtered.slice(0, MAX_RECENT_PLAYLISTS);
+};
+
+const renameRecentPlaylist = (recents, playlist) => {
+    if (!playlist || !playlist._id) return recents;
+    return recents.map((entry) =>
+        entry._id === playlist._id
+            ? { ...entry, name: playlist.name }
+            : entry
+    );
+};
 
 // WITH THIS WE'RE MAKING OUR GLOBAL DATA STORE
 // AVAILABLE TO THE REST OF THE APPLICATION
@@ -65,7 +90,8 @@ function GlobalStoreContextProvider(props) {
         workspaceOverlayActive: false,
         playerOverlayActive: false,
         playerPlaylist: null,
-        playerSongIndex: 0
+        playerSongIndex: 0,
+        recentPlaylists: []
     });
     const history = useHistory();
 
@@ -91,7 +117,8 @@ function GlobalStoreContextProvider(props) {
                         currentSong: null,
                         listNameActive: false,
                         listIdMarkedForDeletion: null,
-                        listMarkedForDeletion: null
+                        listMarkedForDeletion: null,
+                        recentPlaylists: renameRecentPlaylist(prevStore.recentPlaylists, payload.playlist)
                     };
                 }
                 case GlobalStoreActionType.CLOSE_CURRENT_LIST: {
@@ -118,7 +145,8 @@ function GlobalStoreContextProvider(props) {
                         listNameActive: false,
                         listIdMarkedForDeletion: null,
                         listMarkedForDeletion: null,
-                        workspaceOverlayActive: false
+                        workspaceOverlayActive: false,
+                        recentPlaylists: addPlaylistToRecents(prevStore.recentPlaylists, payload)
                     };
                 }
                 case GlobalStoreActionType.LOAD_ID_NAME_PAIRS: {
@@ -149,16 +177,18 @@ function GlobalStoreContextProvider(props) {
                     };
                 }
                 case GlobalStoreActionType.SET_CURRENT_LIST: {
+                    const playlistData = payload.playlist ? payload.playlist : payload;
                     return {
                         ...prevStore,
                         currentModal: CurrentModal.NONE,
-                        currentList: payload.playlist ? payload.playlist : payload,
+                        currentList: playlistData,
                         currentSongIndex: -1,
                         currentSong: null,
                         listNameActive: false,
                         listIdMarkedForDeletion: null,
                         listMarkedForDeletion: null,
-                        workspaceOverlayActive: !!payload.workspaceOverlayActive
+                        workspaceOverlayActive: !!payload.workspaceOverlayActive,
+                        recentPlaylists: addPlaylistToRecents(prevStore.recentPlaylists, playlistData)
                     };
                 }
                 case GlobalStoreActionType.SET_LIST_NAME_EDIT_ACTIVE: {
@@ -211,6 +241,12 @@ function GlobalStoreContextProvider(props) {
                         ...prevStore,
                         currentModal: CurrentModal.NONE,
                         idNamePairs: payload
+                    };
+                }
+                case GlobalStoreActionType.MARK_PLAYLIST_ACCESSED: {
+                    return {
+                        ...prevStore,
+                        recentPlaylists: addPlaylistToRecents(prevStore.recentPlaylists, payload.playlist)
                     };
                 }
                 case GlobalStoreActionType.SET_PLAYER_OVERLAY: {
@@ -377,6 +413,49 @@ store.createNewList = async function () {
             }
         }
         asyncDuplicatePlaylist(id);
+    }
+
+    store.addSongToPlaylist = function(playlistId, song) {
+        async function asyncAdd(id, songData) {
+            try {
+                let response = await storeRequestSender.getPlaylistById(id);
+                if (!response?.data?.success) {
+                    return { success: false, error: 'Could not load playlist' };
+                }
+                const playlist = response.data.playlist;
+                const sanitizedSong = {
+                    title: songData.title,
+                    artist: songData.artist,
+                    year: songData.year,
+                    youTubeId: songData.youTubeId
+                };
+                playlist.songs = Array.isArray(playlist.songs) ? playlist.songs : [];
+                playlist.songs.push(sanitizedSong);
+
+                const updateResponse = await storeRequestSender.updatePlaylistById(id, playlist);
+                if (updateResponse?.data?.success) {
+                    storeReducer({
+                        type: GlobalStoreActionType.MARK_PLAYLIST_ACCESSED,
+                        payload: { playlist }
+                    });
+
+                    if (store.currentList && store.currentList._id === id) {
+                        storeReducer({
+                            type: GlobalStoreActionType.SET_CURRENT_LIST,
+                            payload: { playlist, workspaceOverlayActive: store.workspaceOverlayActive }
+                        });
+                    } else {
+                        store.loadIdNamePairs({ keepCurrentList: true });
+                    }
+                    return { success: true };
+                }
+                return { success: false, error: 'Failed to update playlist' };
+            } catch (err) {
+                console.warn('addSongToPlaylist error:', err);
+                return { success: false, error: 'Unexpected error' };
+            }
+        }
+        return asyncAdd(playlistId, song);
     }
 
     store.openPlayerOverlay = function(playlist, songIndex = 0) {
