@@ -5,6 +5,10 @@ import { useHistory } from "react-router-dom";
 export default function SplashScreen() {
   const history = useHistory();
 
+  const handleContinueAsGuest = () => history.push("/playlists");
+  const handleLogin = () => history.push("/login/");
+  const handleCreate = () => history.push("/register/");
+
   return (
     <div id="splash-wrapper">
       <div id="splash-card">
@@ -22,6 +26,15 @@ export default function SplashScreen() {
           <button className="splash-btn" onClick={() => history.push("/register")}>
             Create Account
           </button>
+          <button onClick={handleContinueAsGuest}>
+            Continue as Guest
+            </button>
+          <button onClick={handleLogin}>
+            Login
+            </button>
+          <button onClick={handleCreate}>
+            Create Account
+            </button>
         </div>
       </div>
     </div>

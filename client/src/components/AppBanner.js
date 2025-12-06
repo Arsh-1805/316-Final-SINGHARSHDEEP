@@ -137,6 +137,24 @@ function getAccountMenu(loggedIn) {
                             ⌂
                         </Link>
                     </Typography>
+                      <Box
+                        sx={{
+                            flexGrow: 1,
+                            display: 'flex',
+                            justifyContent: 'center',
+                            gap: 2,
+                            }}
+                        >
+                        <Button color="inherit" onClick={() => history.push("/")}>
+                         Home
+                        </Button>
+                        <Button color="inherit" onClick={() => history.push("/playlists")}>
+                        Playlists
+                        </Button>
+                        <Button color="inherit" onClick={() => history.push("/songs")}>
+                        Songs Catalog
+                        </Button>
+                        </Box>
                     <Box sx={{ flexGrow: 1 }}>{editToolbar}</Box>
                     <Box sx={{ height: "64px", display: { xs: "none", md: "flex" } }}>
                         <IconButton
