@@ -1,20 +1,18 @@
-import { useContext, useState } from 'react';
+import { useContext } from 'react';
 import { GlobalStoreContext } from '../store';
 import AuthContext from '../auth';
 
 import Box from '@mui/material/Box';
-import DeleteIcon from '@mui/icons-material/Delete';
-import EditIcon from '@mui/icons-material/Edit';
-import IconButton from '@mui/material/IconButton';
-import ListItem from '@mui/material/ListItem';
-import TextField from '@mui/material/TextField';
+import Button from '@mui/material/Button';
+import Paper from '@mui/material/Paper';
+import Typography from '@mui/material/Typography';
+import Avatar from '@mui/material/Avatar';
+import Stack from '@mui/material/Stack';
 
 function PlaylistCard(props) {
     const { store } = useContext(GlobalStoreContext);
     const { auth } = useContext(AuthContext);
 
-    const [editActive, setEditActive] = useState(false);
-    const [text, setText] = useState('');
     const { idNamePair } = props;
 
     const isOwner =
@@ -24,116 +22,111 @@ function PlaylistCard(props) {
         idNamePair.ownerEmail === auth.user.email;
 
     function handleLoadList(event, id) {
-        console.log('handleLoadList for ' + id);
-        if (!event.target.disabled) {
-            let _id = event.target.id;
-            if (_id.indexOf('list-card-text-') >= 0)
-                _id = ('' + _id).substring('list-card-text-'.length);
-
-            console.log('load ' + event.target.id);
-
-            store.setCurrentList(id);
-        }
+        event.preventDefault();
+        store.setCurrentList(id);
     }
 
-    function handleToggleEdit(event) {
+    function handleDeleteList(event, id) {
         event.stopPropagation();
-        if (!isOwner) return; 
-        toggleEdit();
-    }
-
-    function toggleEdit() {
-        let newActive = !editActive;
-        if (newActive) {
-            store.setIsListNameEditActive();
-        }
-        setEditActive(newActive);
-    }
-
-    async function handleDeleteList(event, id) {
-        event.stopPropagation();
-        if (!isOwner) return; 
+        if (!isOwner) return;
         store.markListForDeletion(id);
     }
 
-    function handleKeyPress(event) {
-        if (event.code === 'Enter') {
-            let id = event.target.id.substring('list-'.length);
-            store.changeListName(id, text);
-            toggleEdit();
-        }
-    }
-    function handleUpdateText(event) {
-        setText(event.target.value);
+    function handleEditList(event, id) {
+        event.stopPropagation();
+        store.setCurrentList(id);
     }
 
-    let cardElement = (
-        <ListItem
+    function handleCopyList(event, id) {
+        event.stopPropagation();
+        if (!isOwner) return;
+        store.duplicatePlaylist(id);
+    }
+
+    function handlePlayList(event, id) {
+        event.stopPropagation();
+        store.playPlaylist(id);
+    }
+
+    const ownerLabel = isOwner
+        ? "You"
+        : (idNamePair.ownerEmail || "Unknown Owner");
+
+    return (
+        <Paper
             id={idNamePair._id}
-            key={idNamePair._id}
+            elevation={4}
             sx={{
-                borderRadius: '25px',
-                p: '10px',
-                bgcolor: '#8000F00F',
-                marginTop: '15px',
+                width: '100%',
+                borderRadius: 3,
+                p: 2.5,
                 display: 'flex',
+                flexDirection: 'row',
+                alignItems: 'center',
+                justifyContent: 'space-between',
+                flexWrap: 'wrap',
+                gap: 2,
+                cursor: 'pointer',
             }}
-            style={{
-                transform: 'translate(1%,0%)',
-                width: '98%',
-                fontSize: '48pt',
-            }}
-            button
-            onClick={(event) => {
-                handleLoadList(event, idNamePair._id);
-            }}
+            onClick={(event) => handleLoadList(event, idNamePair._id)}
         >
-            <Box sx={{ p: 1, flexGrow: 1 }}>{idNamePair.name}</Box>
+            <Stack direction="row" spacing={2} alignItems="center">
+                <Avatar sx={{ bgcolor: '#ff80ab', width: 56, height: 56 }}>
+                    {idNamePair.name ? idNamePair.name[0].toUpperCase() : 'P'}
+                </Avatar>
+                <Box>
+                    <Typography variant="h6" sx={{ fontWeight: 'bold', color: '#4a148c' }}>
+                        {idNamePair.name}
+                    </Typography>
+                    <Typography variant="body2" color="text.secondary">
+                        by {ownerLabel}
+                    </Typography>
+                </Box>
+            </Stack>
 
-            {isOwner && (
-                <Box sx={{ p: 1 }}>
-                    <IconButton onClick={handleToggleEdit} aria-label="edit">
-                        <EditIcon style={{ fontSize: '48pt' }} />
-                    </IconButton>
-                </Box>
-            )}
-            {isOwner && (
-                <Box sx={{ p: 1 }}>
-                    <IconButton
-                        onClick={(event) => {
-                            handleDeleteList(event, idNamePair._id);
-                        }}
-                        aria-label="delete"
-                    >
-                        <DeleteIcon style={{ fontSize: '48pt' }} />
-                    </IconButton>
-                </Box>
-            )}
-        </ListItem>
+            <Box sx={{ display: 'flex', gap: 1, flexWrap: 'wrap' }}>
+                {isOwner && (
+                    <>
+                        <Button
+                            variant="contained"
+                            color="error"
+                            size="small"
+                            onClick={(event) => handleDeleteList(event, idNamePair._id)}
+                        >
+                            Delete
+                        </Button>
+                        <Button
+                            variant="contained"
+                            color="primary"
+                            size="small"
+                            onClick={(event) => handleEditList(event, idNamePair._id)}
+                        >
+                            Edit
+                        </Button>
+                        <Button
+                            variant="contained"
+                            color="secondary"
+                            size="small"
+                            onClick={(event) => handleCopyList(event, idNamePair._id)}
+                        >
+                            Copy
+                        </Button>
+                    </>
+                )}
+                <Button
+                    variant="contained"
+                    size="small"
+                    sx={{
+                        bgcolor: '#26a69a',
+                        '&:hover': { bgcolor: '#1f8a7f' }
+                    }}
+                    onClick={(event) => handlePlayList(event, idNamePair._id)}
+                >
+                    Play
+                </Button>
+            </Box>
+        </Paper>
     );
-
-    if (editActive) {
-        cardElement = (
-            <TextField
-                margin="normal"
-                required
-                fullWidth
-                id={'list-' + idNamePair._id}
-                label="Playlist Name"
-                name="name"
-                autoComplete="Playlist Name"
-                className="list-card"
-                onKeyPress={handleKeyPress}
-                onChange={handleUpdateText}
-                defaultValue={idNamePair.name}
-                inputProps={{ style: { fontSize: 48 } }}
-                InputLabelProps={{ style: { fontSize: 24 } }}
-                autoFocus
-            />
-        );
-    }
-
-    return cardElement;
 }
 
 export default PlaylistCard;

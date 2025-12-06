@@ -64,23 +64,14 @@ function WorkspaceScreen() {
         store.closeCurrentList();
     };
 
+    useEffect(() => {
+        if (!store.currentList) {
+            history.push('/playlists');
+        }
+    }, [store.currentList, history]);
+
     if (!store.currentList) {
-        return (
-            <Box
-                sx={{
-                    minHeight: 'calc(100vh - 64px)',
-                    bgcolor: '#ffe4ff',
-                    display: 'flex',
-                    justifyContent: 'center',
-                    alignItems: 'center',
-                    p: 4
-                }}
-            >
-                <Typography variant="h5" color="text.secondary">
-                    Select or create a playlist to begin editing.
-                </Typography>
-            </Box>
-        );
+        return null;
     }
 
     return (

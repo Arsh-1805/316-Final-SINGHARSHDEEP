@@ -1,12 +1,10 @@
 import { useContext, useEffect, useState } from 'react';
-import {useHistory} from 'react-router-dom';
 import { GlobalStoreContext } from '../store';
 import PlaylistCard from './PlaylistCard.js';
 import MUIDeleteModal from './MUIDeleteModal';
 import AuthContext from '../auth';
 
 import AddIcon from '@mui/icons-material/Add';
-import Fab from '@mui/material/Fab';
 import List from '@mui/material/List';
 import Box from '@mui/material/Box';
 import TextField from '@mui/material/TextField';
@@ -24,7 +22,6 @@ import Divider from '@mui/material/Divider';
 const HomeScreen = () => {
     const { store } = useContext(GlobalStoreContext);
     const { auth } = useContext(AuthContext);
-    const history = useHistory(); 
 
     const [nameFilter, setNameFilter] = useState('');
 
@@ -206,16 +203,7 @@ const HomeScreen = () => {
                                 {filteredPairs.length === 1 ? 'Playlist' : 'Playlists'}
                             </Typography>
 
-                            {auth.loggedIn && (
-                                <Fab
-                                    color="primary"
-                                    size="small"
-                                    aria-label="add"
-                                    onClick={handleCreateNewList}
-                                >
-                                    <AddIcon />
-                                </Fab>
-                            )}
+                            
                         </Box>
 
                         <Divider sx={{ mb: 2 }} />

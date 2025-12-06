@@ -325,6 +325,41 @@ store.createNewList = async function () {
     }
 };
 
+    store.duplicatePlaylist = function (id) {
+        if (!auth.user || !auth.user.email) {
+            console.error("No logged-in user, cannot duplicate playlist.");
+            return;
+        }
+        async function asyncDuplicatePlaylist(id) {
+            let response = await storeRequestSender.getPlaylistById(id);
+            if (response.data.success) {
+                const playlist = response.data.playlist;
+                const baseName = playlist.name || "Untitled";
+                const existingNames = new Set(
+                    store.idNamePairs.map((pair) => pair.name.toLowerCase())
+                );
+                let copyName = `${baseName} Copy`;
+                let suffix = 2;
+                while (existingNames.has(copyName.toLowerCase())) {
+                    copyName = `${baseName} Copy ${suffix++}`;
+                }
+                const createResponse = await storeRequestSender.createPlaylist(
+                    copyName,
+                    playlist.songs || [],
+                    auth.user.email
+                );
+                if (createResponse.status === 201 && createResponse.data && createResponse.data.playlist) {
+                    store.loadIdNamePairs({ keepCurrentList: true });
+                }
+            }
+        }
+        asyncDuplicatePlaylist(id);
+    }
+
+    store.playPlaylist = function (id) {
+        store.setCurrentList(id);
+    }
+
     // THIS FUNCTION LOADS ALL THE ID, NAME PAIRS SO WE CAN LIST ALL THE LISTS
     store.loadIdNamePairs = function (options = {}) {
         const { keepCurrentList = false } = options;
