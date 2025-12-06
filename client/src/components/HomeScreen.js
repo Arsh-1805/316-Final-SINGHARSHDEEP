@@ -17,6 +17,10 @@ import IconButton from '@mui/material/IconButton';
 import InputAdornment from '@mui/material/InputAdornment';
 import ClearIcon from '@mui/icons-material/Clear';
 import SearchIcon from '@mui/icons-material/Search';
+import FormControl from '@mui/material/FormControl';
+import InputLabel from '@mui/material/InputLabel';
+import Select from '@mui/material/Select';
+import MenuItem from '@mui/material/MenuItem';
 
 /*
     Playlists screen. Lists all playlists owned by the user
@@ -35,6 +39,7 @@ const HomeScreen = () => {
     const [songArtistFilter, setSongArtistFilter] = useState('');
     const [songYearFilter, setSongYearFilter] = useState('');
     const [ownerFilter, setOwnerFilter] = useState(auth.loggedIn ? 'mine' : 'all');
+    const [sortOption, setSortOption] = useState('listenersHigh');
 
     useEffect(() => {
         store.loadIdNamePairs();
@@ -67,7 +72,25 @@ const HomeScreen = () => {
         songArtistFilter.trim() ||
         songYearFilter.trim();
 
-    const filteredPairs = store.idNamePairs
+    const sortComparators = {
+        listenersHigh: (a, b) => (b.listenerCount || 0) - (a.listenerCount || 0),
+        listenersLow: (a, b) => (a.listenerCount || 0) - (b.listenerCount || 0),
+        nameAZ: (a, b) => a.name.localeCompare(b.name),
+        nameZA: (a, b) => b.name.localeCompare(a.name),
+        ownerAZ: (a, b) => (a.ownerName || a.ownerEmail || '').localeCompare(b.ownerName || b.ownerEmail || ''),
+        ownerZA: (a, b) => (b.ownerName || b.ownerEmail || '').localeCompare(a.ownerName || a.ownerEmail || ''),
+    };
+
+    const sortOptionsList = [
+        { value: 'listenersHigh', label: 'Listeners (Hi-Lo)' },
+        { value: 'listenersLow', label: 'Listeners (Lo-Hi)' },
+        { value: 'nameAZ', label: 'Playlist (A-Z)' },
+        { value: 'nameZA', label: 'Playlist (Z-A)' },
+        { value: 'ownerAZ', label: 'Owner (A-Z)' },
+        { value: 'ownerZA', label: 'Owner (Z-A)' },
+    ];
+
+    const filteredPairs = [...store.idNamePairs]
         .filter((pair) =>
             pair.name.toLowerCase().includes(nameFilter.toLowerCase())
         )
@@ -111,7 +134,8 @@ const HomeScreen = () => {
                         .includes(yearFilter)
                 );
             return matchesTitle && matchesArtist && matchesYear;
-        });
+        })
+        .sort(sortComparators[sortOption] || sortComparators.listenersHigh);
 
     let listCard = '';
     if (store) {
@@ -308,24 +332,48 @@ const HomeScreen = () => {
                         <Box
                             sx={{
                                 display: 'flex',
-                                alignItems: 'center',
-                                justifyContent: 'space-between',
-                                flexWrap: 'wrap',
-                                gap: 2,
+                                flexDirection: 'column',
+                                gap: 1.5,
                                 mb: 2,
                             }}
                         >
-                            <Box sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
-                                <Typography variant="subtitle1">Sort:</Typography>
-                                <Typography
-                                    variant="subtitle1"
-                                    sx={{ color: '#303f9f', cursor: 'pointer' }}
-                                >
-                                    Name (A–Z)
+                            <Box
+                                sx={{
+                                    display: 'flex',
+                                    alignItems: 'center',
+                                    justifyContent: 'space-between',
+                                    gap: 1,
+                                    flexWrap: 'wrap',
+                                }}
+                            >
+                                <Box sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
+                                    <Typography variant="subtitle1" sx={{ fontWeight: 'bold' }}>
+                                        Sort:
+                                    </Typography>
+                                    <FormControl size="small" sx={{ minWidth: 170 }}>
+                                        <InputLabel id="playlist-sort-label">Sort by</InputLabel>
+                                        <Select
+                                            labelId="playlist-sort-label"
+                                            label="Sort by"
+                                            value={sortOption}
+                                            onChange={(e) => setSortOption(e.target.value)}
+                                        >
+                                            {sortOptionsList.map((option) => (
+                                                <MenuItem key={option.value} value={option.value}>
+                                                    {option.label}
+                                                </MenuItem>
+                                            ))}
+                                        </Select>
+                                    </FormControl>
+                                </Box>
+
+                                <Typography variant="subtitle1" sx={{ fontWeight: 'bold' }}>
+                                    {filteredPairs.length}{' '}
+                                    {filteredPairs.length === 1 ? 'Playlist' : 'Playlists'}
                                 </Typography>
                             </Box>
 
-                            <Box sx={{ display: 'flex', gap: 1 }}>
+                            <Box sx={{ display: 'flex', gap: 1, flexWrap: 'wrap', alignItems: 'center' }}>
                                 {[
                                     { value: 'mine', label: 'My Playlists', disabled: !auth.loggedIn },
                                     { value: 'others', label: 'Others', disabled: !auth.loggedIn },
@@ -351,10 +399,6 @@ const HomeScreen = () => {
                                 ))}
                             </Box>
 
-                            <Typography variant="subtitle1">
-                                {filteredPairs.length}{' '}
-                                {filteredPairs.length === 1 ? 'Playlist' : 'Playlists'}
-                            </Typography>
                         </Box>
 
                         <Divider sx={{ mb: 2 }} />
