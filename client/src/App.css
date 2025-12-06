@@ -9,27 +9,31 @@
   --bounceEasing: cubic-bezier(0.51, 0.92, 0.24, 1.15);
 }
 
+body {
+  margin: 0;
+  background-color: var(--swatch-primary);
+  font-family: "Lexend Exa", sans-serif;
+}
+
 #root {
   background-color: var(--swatch-primary);
-  font-family: "Lexend Exa";
-  position: absolute;
-  width: 80%;
-  left: 10%;
-  height: 90%;
-  top: 5%;
+  font-family: "Lexend Exa", sans-serif;
+  position: relative;
+  width: 100%;
+  min-height: 100vh;
 }
 
 #app-root {
-  position: absolute;
+  position: relative;
   width: 100%;
-  height: 100%;
-  top: 0%;
-  left: 0%;
+  min-height: 100vh;
 }
 
 #edit-toolbar {
   background-color: transparent;
-  transform: translate(41%, 0%);
+  display: flex;
+  justify-content: flex-end;
+  gap: 12px;
 }
 
 .playlister-button,
@@ -75,16 +79,20 @@
 }
 
 #playlister-statusbar {
-  position: absolute;
-  left: 0%;
-  top: 90%;
+  position: fixed;
+  left: 0;
+  bottom: 0;
   width: 100%;
-  height: 10%;
+  height: 60px;
   background-color: rgb(255, 0, 247);
   display: flex;
   align-items: center;
   justify-content: center;
-  font-size: 50pt;
+  font-size: 24pt;
+  font-weight: bold;
+  color: black;
+  z-index: 1200;
+  box-shadow: 0 -4px 12px rgba(0, 0, 0, 0.2);
 }
 
 #list-selector-heading {
@@ -107,14 +115,14 @@
 }
 
 #list-selector-list {
-  position: absolute;
-  left: 0%;
-  top: 10%;
+  position: relative;
   width: 100%;
-  height: 90%;
+  height: 100%;
   display: flex;
   flex-direction: column;
-  overflow: scroll;
+  gap: 12px;
+  overflow-y: auto;
+  padding-bottom: 80px;
 }
 
 

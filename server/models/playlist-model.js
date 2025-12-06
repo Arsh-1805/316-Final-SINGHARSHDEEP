@@ -6,6 +6,7 @@ const PlaylistSchema = new Schema(
     {
         name: { type: String, required: true },
         owner: { type: ObjectId, ref: 'User', required: true },
+        ownerEmail: { type: String, required: true },
         songs: [
             {
                 title: String,

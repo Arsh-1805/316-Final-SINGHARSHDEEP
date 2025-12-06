@@ -26,6 +26,7 @@ export const GlobalStoreActionType = {
     CLOSE_CURRENT_LIST: "CLOSE_CURRENT_LIST",
     CREATE_NEW_LIST: "CREATE_NEW_LIST",
     LOAD_ID_NAME_PAIRS: "LOAD_ID_NAME_PAIRS",
+    REFRESH_ID_NAME_PAIRS: "REFRESH_ID_NAME_PAIRS",
     MARK_LIST_FOR_DELETION: "MARK_LIST_FOR_DELETION",
     SET_CURRENT_LIST: "SET_CURRENT_LIST",
     SET_LIST_NAME_EDIT_ACTIVE: "SET_LIST_NAME_EDIT_ACTIVE",
@@ -210,6 +211,13 @@ function GlobalStoreContextProvider(props) {
                     listMarkedForDeletion: null
                 });
             }
+            case GlobalStoreActionType.REFRESH_ID_NAME_PAIRS: {
+                return setStore({
+                    ...store,
+                    currentModal: CurrentModal.NONE,
+                    idNamePairs: payload
+                });
+            }
             default:
                 return store;
         }
@@ -277,6 +285,7 @@ function GlobalStoreContextProvider(props) {
         });
         tps.clearAllTransactions();
         history.push("/");
+        store.loadIdNamePairs();
     }
 
     // THIS FUNCTION CREATES A NEW LIST
@@ -309,6 +318,7 @@ store.createNewList = async function () {
             payload: newList
         });
         history.push("/playlist/" + newList._id);
+        store.loadIdNamePairs({ keepCurrentList: true });
     }
     else {
         console.log("FAILED TO CREATE A NEW LIST");
@@ -316,14 +326,15 @@ store.createNewList = async function () {
 };
 
     // THIS FUNCTION LOADS ALL THE ID, NAME PAIRS SO WE CAN LIST ALL THE LISTS
-    store.loadIdNamePairs = function () {
+    store.loadIdNamePairs = function (options = {}) {
+        const { keepCurrentList = false } = options;
         async function asyncLoadIdNamePairs() {
             const response = await storeRequestSender.getPlaylistPairs();
             if (response.data.success) {
                 let pairsArray = response.data.idNamePairs;
                 console.log(pairsArray);
                 storeReducer({
-                    type: GlobalStoreActionType.LOAD_ID_NAME_PAIRS,
+                    type: keepCurrentList ? GlobalStoreActionType.REFRESH_ID_NAME_PAIRS : GlobalStoreActionType.LOAD_ID_NAME_PAIRS,
                     payload: pairsArray
                 });
             }

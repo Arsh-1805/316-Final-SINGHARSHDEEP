@@ -9,6 +9,8 @@ const express = require('express');
 const router = express.Router();
 const StoreController = require('../controllers/store-controller');
 
+router.get('/playlistpairs', StoreController.getPlaylistPairs);
+router.get('/playlist/:id', StoreController.getPlaylistById);
 router.post('/playlist', StoreController.createPlaylist);
 router.put('/playlist/:id', StoreController.updatePlaylist);
 router.delete('/playlist/:id', StoreController.deletePlaylist);

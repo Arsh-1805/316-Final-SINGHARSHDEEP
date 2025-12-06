@@ -24,6 +24,7 @@ async function createPlaylist(req, res) {
         const playlist = new Playlist({
             name,
             owner: user._id,
+            ownerEmail: user.email,
             songs: []
         });
 

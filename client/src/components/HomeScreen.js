@@ -64,18 +64,6 @@ const HomeScreen = () => {
                         selected={false}
                     />
                 ))}
-
-                {auth.loggedIn && (
-                    <Fab
-                        sx={{ mt: 2, alignSelf: 'center' }}
-                        color="primary"
-                        aria-label="add"
-                        id="add-list-button"
-                        onClick={handleCreateNewList}
-                    >
-                        <AddIcon />
-                    </Fab>
-                )}
             </List>
         );
     }
@@ -236,6 +224,23 @@ const HomeScreen = () => {
                             {listCard}
                             <MUIDeleteModal />
                         </Box>
+
+                        {auth.loggedIn && (
+                            <Button
+                                variant="contained"
+                                startIcon={<AddIcon />}
+                                sx={{
+                                    alignSelf: 'center',
+                                    mt: 3,
+                                    px: 4,
+                                    bgcolor: '#5e35b1',
+                                    '&:hover': { bgcolor: '#4527a0' },
+                                }}
+                                onClick={handleCreateNewList}
+                            >
+                                New Playlist
+                            </Button>
+                        )}
                     </Box>
                 </Box>
             </Box>

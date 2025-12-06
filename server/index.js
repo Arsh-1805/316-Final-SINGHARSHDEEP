@@ -11,6 +11,7 @@ const PostgresDatabaseManager = require("./db/postgresql");
 
 const authRouter = require("./routes/auth-router");
 const playlistRouter = require("./routes/playlist-router");
+const storeRouter = require("./routes/store-router");
 
 const app = express();
 
@@ -26,6 +27,7 @@ app.use(cookieParser());
 app.use("/auth", authRouter);
 
 app.use("/playlist", playlistRouter);
+app.use("/api", storeRouter);
 
 const PORT = process.env.PORT || 4000;
 
