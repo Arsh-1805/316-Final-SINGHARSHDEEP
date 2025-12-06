@@ -167,21 +167,15 @@ auth.registerUser = async function (
   };
 
   auth.logoutUser = async function () {
-    try {
-      const response = await authRequestSender.logoutUser();
-      if (response.status !== 200) {
-        console.error("Logout server error:", response.status);
-      }
-    } catch (err) {
-      console.error("Logout request failed (forcing client logout):", err);
-    } finally {
-      authReducer({
-        type: AuthActionType.LOGOUT_USER,
-        payload: null,
-      });
-      history.push("/login"); 
-    }
-  };
+  const response = await authRequestSender.logoutUser();
+  if (response.status === 200) {
+    authReducer({
+      type: AuthActionType.LOGOUT_USER,
+      payload: null,
+    });
+    history.push("/");
+  }
+};
 
 auth.getUserInitials = function () {
   if (!auth.user) return "";

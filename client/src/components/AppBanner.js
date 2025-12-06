@@ -61,32 +61,27 @@ export default function AppBanner() {
         </Menu>
     );
 
-const loggedInMenu =
-    <Menu
-        anchorEl={anchorEl}
-        anchorOrigin={{
-            vertical: 'top',
-            horizontal: 'right',
-        }}
-        id={menuId}
-        keepMounted
-        transformOrigin={{
-            vertical: 'top',
-            horizontal: 'right',
-        }}
-        open={isMenuOpen}
-        onClose={handleMenuClose}
+const loggedInMenu = (
+  <Menu
+    anchorEl={anchorEl}
+    anchorOrigin={{ vertical: 'top', horizontal: 'right' }}
+    id={menuId}
+    keepMounted
+    transformOrigin={{ vertical: 'top', horizontal: 'right' }}
+    open={isMenuOpen}
+    onClose={handleMenuClose}
+  >
+    <MenuItem
+      onClick={() => {
+        handleMenuClose();
+        history.push("/account/");
+      }}
     >
-        <MenuItem
-            onClick={() => {
-                handleMenuClose();
-                history.push("/account/");   
-            }}
-        >
-            Edit Account
-        </MenuItem>
-        <MenuItem onClick={handleLogout}>Logout</MenuItem>
-    </Menu>;
+      Edit Account
+    </MenuItem>
+    <MenuItem onClick={handleLogout}>Logout</MenuItem>
+  </Menu>
+);
 
     let editToolbar = "";
     let menu = loggedOutMenu;
