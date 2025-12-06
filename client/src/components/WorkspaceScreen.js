@@ -49,7 +49,8 @@ function WorkspaceScreen({ embedded = false }) {
 
     const handleAddSong = () => {
         if (isGuest) return;
-        store.addNewSong();
+        store.closeCurrentList();
+        history.push('/songs');
     };
 
     const handleUndo = () => {
@@ -120,13 +121,13 @@ function WorkspaceScreen({ embedded = false }) {
                         variant="contained"
                         startIcon={<AddIcon />}
                         onClick={handleAddSong}
-                        disabled={isGuest || !store.canAddNewSong()}
+                        disabled={isGuest}
                         sx={{
                             bgcolor: '#7e57c2',
                             '&:hover': { bgcolor: '#673ab7' }
                         }}
                     >
-                        New Song
+                        Add Song (Go to Catalog)
                     </Button>
                 </Box>
 

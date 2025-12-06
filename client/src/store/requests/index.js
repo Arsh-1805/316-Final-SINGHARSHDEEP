@@ -1,4 +1,5 @@
 const API_BASE = "http://localhost:4000/api";
+const ROOT_API = "http://localhost:4000";
 
 async function fetchJSON(url, options = {}) {
   const res = await fetch(url, {
@@ -27,6 +28,10 @@ const apis = {
 
   getPlaylistById: (id) =>
     fetchJSON(`${API_BASE}/playlist/${id}`, {
+      method: "GET",
+    }),
+  getSharedPlaylistById: (id) =>
+    fetchJSON(`${ROOT_API}/playlist/${id}`, {
       method: "GET",
     }),
 

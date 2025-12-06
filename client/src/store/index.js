@@ -403,7 +403,10 @@ store.createNewList = async function () {
         }
         async function asyncDuplicatePlaylist(id) {
             let response = await storeRequestSender.getPlaylistById(id);
-            if (response.data.success) {
+            if (!response.data.success) {
+                response = await storeRequestSender.getSharedPlaylistById(id);
+            }
+            if (response.data && response.data.success) {
                 const playlist = response.data.playlist;
                 const baseName = playlist.name || "Untitled";
                 const existingNames = new Set(

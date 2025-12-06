@@ -39,7 +39,7 @@ function PlaylistCard(props) {
 
     function handleCopyList(event, id) {
         event.stopPropagation();
-        if (!isOwner) return;
+        if (!auth.loggedIn) return;
         store.duplicatePlaylist(id);
     }
 
@@ -51,6 +51,7 @@ function PlaylistCard(props) {
     const ownerLabel = isOwner
         ? "You"
         : (idNamePair.ownerEmail || "Unknown Owner");
+    const canCopy = auth.loggedIn;
 
     return (
         <Paper
@@ -103,15 +104,17 @@ function PlaylistCard(props) {
                         >
                             Edit
                         </Button>
-                        <Button
-                            variant="contained"
-                            color="secondary"
-                            size="small"
-                            onClick={(event) => handleCopyList(event, idNamePair._id)}
-                        >
-                            Copy
-                        </Button>
                     </>
+                )}
+                {canCopy && (
+                    <Button
+                        variant="contained"
+                        color="secondary"
+                        size="small"
+                        onClick={(event) => handleCopyList(event, idNamePair._id)}
+                    >
+                        Copy
+                    </Button>
                 )}
                 <Button
                     variant="contained"
