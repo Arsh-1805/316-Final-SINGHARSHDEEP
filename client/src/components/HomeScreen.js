@@ -32,7 +32,7 @@ const HomeScreen = () => {
     const [songTitleFilter, setSongTitleFilter] = useState('');
     const [songArtistFilter, setSongArtistFilter] = useState('');
     const [songYearFilter, setSongYearFilter] = useState('');
-    const [ownerFilter, setOwnerFilter] = useState('all');
+    const [ownerFilter, setOwnerFilter] = useState('mine');
 
     useEffect(() => {
         store.loadIdNamePairs();
@@ -51,24 +51,23 @@ const HomeScreen = () => {
         setSongTitleFilter('');
         setSongArtistFilter('');
         setSongYearFilter('');
-        setOwnerFilter('all');
+        setOwnerFilter('mine');
     }
 
     const filteredPairs = store.idNamePairs
         .filter((pair) =>
             pair.name.toLowerCase().includes(nameFilter.toLowerCase())
         )
-        .filter((pair) =>
-            pair.ownerName?.toLowerCase().includes(ownerNameFilter.toLowerCase()) || ownerNameFilter.trim() === ''
-        )
+        .filter((pair) => {
+            const ownerDisplay =
+                (pair.ownerName || pair.ownerEmail || '').toLowerCase();
+            return ownerDisplay.includes(ownerNameFilter.toLowerCase());
+        })
         .filter((pair) => {
             if (ownerFilter === 'mine') {
                 return auth.user && pair.ownerEmail === auth.user.email;
             }
-            if (ownerFilter === 'others') {
-                return !auth.user || pair.ownerEmail !== auth.user.email;
-            }
-            return true;
+            return !auth.user || pair.ownerEmail !== auth.user.email;
         })
         .filter((pair) => {
             const songs = pair.songs || [];
@@ -76,9 +75,24 @@ const HomeScreen = () => {
             const artistFilter = songArtistFilter.trim().toLowerCase();
             const yearFilter = songYearFilter.trim().toLowerCase();
 
-            const matchesTitle = !titleFilter || songs.some(song => (song.title || '').toLowerCase().includes(titleFilter));
-            const matchesArtist = !artistFilter || songs.some(song => (song.artist || '').toLowerCase().includes(artistFilter));
-            const matchesYear = !yearFilter || songs.some(song => (song.year || '').toString().toLowerCase().includes(yearFilter));
+            const matchesTitle =
+                !titleFilter ||
+                songs.some((song) =>
+                    (song.title || '').toLowerCase().includes(titleFilter)
+                );
+            const matchesArtist =
+                !artistFilter ||
+                songs.some((song) =>
+                    (song.artist || '').toLowerCase().includes(artistFilter)
+                );
+            const matchesYear =
+                !yearFilter ||
+                songs.some((song) =>
+                    (song.year || '')
+                        .toString()
+                        .toLowerCase()
+                        .includes(yearFilter)
+                );
             return matchesTitle && matchesArtist && matchesYear;
         });
 
@@ -186,19 +200,20 @@ const HomeScreen = () => {
                             onChange={(e) => setSongYearFilter(e.target.value)}
                         />
 
-                        <ToggleButtonGroup
-                            value={ownerFilter}
-                            exclusive
-                            onChange={(event, value) => {
-                                if (value !== null) setOwnerFilter(value);
-                            }}
-                            size="small"
-                            color="secondary"
-                        >
-                            <ToggleButton value="all">All</ToggleButton>
-                            <ToggleButton value="mine">My Playlists</ToggleButton>
-                            <ToggleButton value="others">Others</ToggleButton>
-                        </ToggleButtonGroup>
+                        {auth.loggedIn && (
+                            <ToggleButtonGroup
+                                value={ownerFilter}
+                                exclusive
+                                onChange={(event, value) => {
+                                    if (value !== null) setOwnerFilter(value);
+                                }}
+                                size="small"
+                                color="secondary"
+                            >
+                                <ToggleButton value="mine">My Playlists</ToggleButton>
+                                <ToggleButton value="others">Others</ToggleButton>
+                            </ToggleButtonGroup>
+                        )}
 
                         <Box
                             sx={{
