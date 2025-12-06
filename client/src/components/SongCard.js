@@ -5,6 +5,8 @@ import Box from '@mui/material/Box';
 import IconButton from '@mui/material/IconButton';
 import Typography from '@mui/material/Typography';
 import DeleteIcon from '@mui/icons-material/Delete';
+import ContentCopyIcon from '@mui/icons-material/ContentCopy';
+import EditIcon from '@mui/icons-material/Edit';
 
 function SongCard(props) {
     const { store } = useContext(GlobalStoreContext);
@@ -44,16 +46,27 @@ function SongCard(props) {
         store.addMoveSongTransaction(sourceIndex, targetIndex);
     }
 
-    /** DELETE SONG — disabled for guests **/
+    /** SONG ACTIONS **/
     function handleRemoveSong(event) {
         if (isGuest) return;
         store.addRemoveSongTransaction(song, index);
     }
 
-    /** DOUBLE CLICK TO EDIT — disabled for guests **/
     function handleDoubleClick() {
         if (isGuest) return;
         store.showEditSongModal(index, song);
+    }
+
+    function handleEditSong(event) {
+        event.stopPropagation();
+        if (isGuest) return;
+        store.showEditSongModal(index, song);
+    }
+
+    function handleCopySong(event) {
+        event.stopPropagation();
+        if (isGuest) return;
+        store.addCreateSongTransaction(index + 1, song.title, song.artist, song.year, song.youTubeId);
     }
 
     return (
@@ -115,22 +128,49 @@ function SongCard(props) {
                 </Typography>
             </Box>
 
-            {/* REMOVE BUTTON — HIDDEN for guests */}
             {!isGuest && (
-                <IconButton
-                    aria-label="delete song"
-                    onClick={handleRemoveSong}
-                    id={"remove-song-" + index}
-                    sx={{
-                        color: "#7b1fa2",
-                        backgroundColor: "white",
-                        "&:hover": {
-                            backgroundColor: "#f3e5f5",
-                        },
-                    }}
-                >
-                    <DeleteIcon />
-                </IconButton>
+                <Box sx={{ display: 'flex', gap: 1 }}>
+                    <IconButton
+                        aria-label="copy song"
+                        onClick={handleCopySong}
+                        sx={{
+                            color: "#5e35b1",
+                            backgroundColor: "white",
+                            "&:hover": {
+                                backgroundColor: "#ede7f6",
+                            },
+                        }}
+                    >
+                        <ContentCopyIcon />
+                    </IconButton>
+                    <IconButton
+                        aria-label="edit song"
+                        onClick={handleEditSong}
+                        sx={{
+                            color: "#1e88e5",
+                            backgroundColor: "white",
+                            "&:hover": {
+                                backgroundColor: "#e3f2fd",
+                            },
+                        }}
+                    >
+                        <EditIcon />
+                    </IconButton>
+                    <IconButton
+                        aria-label="delete song"
+                        onClick={handleRemoveSong}
+                        id={"remove-song-" + index}
+                        sx={{
+                            color: "#c62828",
+                            backgroundColor: "white",
+                            "&:hover": {
+                                backgroundColor: "#ffcdd2",
+                            },
+                        }}
+                    >
+                        <DeleteIcon />
+                    </IconButton>
+                </Box>
             )}
         </Box>
     );
