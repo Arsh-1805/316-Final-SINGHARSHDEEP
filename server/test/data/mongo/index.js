@@ -29,6 +29,8 @@ async function resetMongo() {
         firstName: "Arshdeep",
         lastName: "Singh",
         email: "arsh@doe.com",
+        userName: "arsh",
+        avatar: "",
         passwordHash: bcrypt.hashSync("aaaaaaaa", 10),
         };
 
@@ -122,6 +124,13 @@ async function resetMongo() {
         );
     }
 
+    testData.users = testData.users.map((user, index) => ({
+        ...user,
+        userName: user.userName || user.firstName || `user${index + 1}`,
+        avatar: user.avatar || "",
+        passwordHash: user.passwordHash || bcrypt.hashSync("aaaaaaaa", 10),
+    }));
+
     console.log("Resetting the Mongo DB")
     await clearCollection(Playlist, "Playlist");
     await clearCollection(User, "User");
@@ -136,5 +145,4 @@ mongoose
     .catch(e => {
         console.error('Connection error', e.message)
     })
-
 

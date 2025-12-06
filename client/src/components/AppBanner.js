@@ -125,10 +125,11 @@ function getAccountMenu(loggedIn) {
         return (
         <Box sx={{ flexGrow: 1 }}>
             <AppBar
-                position="static"
+                position="fixed"
                 sx={{
                     backgroundColor: "#ff66ff",      
-                    boxShadow: "none",               
+                    boxShadow: "none",
+                    zIndex: (theme) => theme.zIndex.drawer + 10               
                 }}
             >
                 <Toolbar sx={{ minHeight: 64 }}>
@@ -152,6 +153,7 @@ function getAccountMenu(loggedIn) {
                             display: 'flex',
                             justifyContent: 'center',
                             gap: 2,
+                            pointerEvents: 'auto'
                             }}
                         >
                         {showLibraryLinks && (
@@ -189,7 +191,7 @@ function getAccountMenu(loggedIn) {
                     </Box>
                 </Toolbar>
             </AppBar>
-
+            <Toolbar />
             <Box
                 sx={{
                     width: "100%",
