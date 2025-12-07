@@ -2,7 +2,6 @@ export function normalizeYouTubeId(value = '') {
     let input = (value ?? '').trim();
     if (!input) return '';
 
-    // Try to parse as a URL to support pasting any YouTube link format
     try {
         const url = new URL(input);
         const hostname = url.hostname.toLowerCase();
@@ -28,7 +27,6 @@ export function normalizeYouTubeId(value = '') {
             }
         }
     } catch (err) {
-        // Not a URL, fall through and treat as raw input.
     }
 
     const possibleId = input.replace(/[^\w-]/g, '');

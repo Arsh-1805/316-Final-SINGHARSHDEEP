@@ -15,12 +15,9 @@ import AuthContext from '../auth'
     @author McKilla Gorilla
 */
 
-// THIS IS THE CONTEXT WE'LL USE TO SHARE OUR STORE
 export const GlobalStoreContext = createContext({});
 console.log("create GlobalStoreContext");
 
-// THESE ARE ALL THE TYPES OF UPDATES TO OUR GLOBAL
-// DATA STORE STATE THAT CAN BE PROCESSED
 export const GlobalStoreActionType = {
     CHANGE_LIST_NAME: "CHANGE_LIST_NAME",
     CLOSE_CURRENT_LIST: "CLOSE_CURRENT_LIST",
@@ -39,7 +36,6 @@ export const GlobalStoreActionType = {
     MARK_PLAYLIST_ACCESSED: "MARK_PLAYLIST_ACCESSED"
 }
 
-// WE'LL NEED THIS TO PROCESS TRANSACTIONS
 const tps = new jsTPS();
 
 const CurrentModal = {
@@ -97,10 +93,7 @@ const songsEqual = (a, b) => {
     );
 };
 
-// WITH THIS WE'RE MAKING OUR GLOBAL DATA STORE
-// AVAILABLE TO THE REST OF THE APPLICATION
 function GlobalStoreContextProvider(props) {
-    // THESE ARE ALL THE THINGS OUR DATA STORE WILL MANAGE
     const [store, setStore] = useState({
         currentModal : CurrentModal.NONE,
         idNamePairs: [],
@@ -121,12 +114,9 @@ function GlobalStoreContextProvider(props) {
 
     console.log("inside useGlobalStore");
 
-    // SINCE WE'VE WRAPPED THE STORE IN THE AUTH CONTEXT WE CAN ACCESS THE USER HERE
     const { auth } = useContext(AuthContext);
     console.log("auth: " + auth);
 
-    // HERE'S THE DATA STORE'S REDUCER, IT MUST
-    // HANDLE EVERY TYPE OF STATE CHANGE
     const storeReducer = (action) => {
         const { type, payload } = action;
         setStore((prevStore) => {
@@ -317,14 +307,9 @@ function GlobalStoreContextProvider(props) {
         history.push("/playlist/635f203d2e072037af2e6284");
     }
 
-    // THESE ARE THE FUNCTIONS THAT WILL UPDATE OUR STORE AND
-    // DRIVE THE STATE OF THE APPLICATION. WE'LL CALL THESE IN 
-    // RESPONSE TO EVENTS INSIDE OUR COMPONENTS.
 
-    // THIS FUNCTION PROCESSES CHANGING A LIST NAME
     store.changeListName = function (id, newName, options = {}) {
         const { stayOnHome = false } = options;
-        // GET THE LIST
         async function asyncChangeListName(id) {
             let response = await storeRequestSender.getPlaylistById(id);
             if (response.data.success) {
@@ -356,7 +341,6 @@ function GlobalStoreContextProvider(props) {
         asyncChangeListName(id);
     }
 
-    // THIS FUNCTION PROCESSES CLOSING THE CURRENTLY LOADED LIST
     store.closeCurrentList = function () {
         const stayOnHome = store.workspaceOverlayActive;
         storeReducer({
@@ -368,27 +352,22 @@ function GlobalStoreContextProvider(props) {
         store.loadIdNamePairs();
     }
 
-    // THIS FUNCTION CREATES A NEW LIST
 store.createNewList = async function () {
-    // 1. make sure we actually have a logged-in user
     if (!auth.user || !auth.user.email) {
         console.error("No logged-in user, cannot create playlist.");
         return;
     }
 
-    // 2. build the name the same way you had it
     let newListName = "Untitled" + store.newListCounter;
 
-    // 3. call the request with the 3 params your store expects
     const response = await storeRequestSender.createPlaylist(
         newListName,
-        [],                  // empty songs array to start
-        auth.user.email      // owner
+        [],                  
+        auth.user.email      
     );
 
     console.log("createNewList response:", response);
 
-    // 4. same success check as you had
     if (response.status === 201 && response.data && response.data.playlist) {
         tps.clearAllTransactions();
         let newList = response.data.playlist;
@@ -617,7 +596,6 @@ store.createNewList = async function () {
         asyncPlay(id);
     }
 
-    // THIS FUNCTION LOADS ALL THE ID, NAME PAIRS SO WE CAN LIST ALL THE LISTS
     store.loadIdNamePairs = function (options = {}) {
         const { keepCurrentList = false } = options;
         async function asyncLoadIdNamePairs() {
@@ -637,10 +615,6 @@ store.createNewList = async function () {
         asyncLoadIdNamePairs();
     }
 
-    // THE FOLLOWING 5 FUNCTIONS ARE FOR COORDINATING THE DELETION
-    // OF A LIST, WHICH INCLUDES USING A VERIFICATION MODAL. THE
-    // FUNCTIONS ARE markListForDeletion, deleteList, deleteMarkedList,
-    // showDeleteListModal, and hideDeleteListModal
     store.markListForDeletion = function (id) {
         async function getListToDelete(id) {
             let response = await storeRequestSender.getPlaylistById(id);
@@ -669,8 +643,6 @@ store.createNewList = async function () {
         store.hideModals();
         
     }
-    // THIS FUNCTION SHOWS THE MODAL FOR PROMPTING THE USER
-    // TO SEE IF THEY REALLY WANT TO DELETE THE LIST
 
     store.showEditSongModal = (songIndex, songToEdit) => {
         storeReducer({
@@ -695,10 +667,6 @@ store.createNewList = async function () {
         return store.currentModal === CurrentModal.ERROR;
     }
 
-    // THE FOLLOWING 8 FUNCTIONS ARE FOR COORDINATING THE UPDATING
-    // OF A LIST, WHICH INCLUDES DEALING WITH THE TRANSACTION STACK. THE
-    // FUNCTIONS ARE setCurrentList, addMoveItemTransaction, addUpdateItemTransaction,
-    // moveItem, updateItem, updateCurrentList, undo, and redo
     store.setCurrentList = function (id, options = {}) {
         const { stayOnHome = false } = options;
         async function asyncSetCurrentList(id) {
@@ -728,20 +696,16 @@ store.createNewList = async function () {
         let index = this.getPlaylistSize();
         this.addCreateSongTransaction(index, "Untitled", "?", new Date().getFullYear(), "dQw4w9WgXcQ");
     }
-    // THIS FUNCTION CREATES A NEW SONG IN THE CURRENT LIST
-    // USING THE PROVIDED DATA AND PUTS THIS SONG AT INDEX
+
     store.createSong = function(index, song) {
         let list = store.currentList;      
         list.songs.splice(index, 0, song);
-        // NOW MAKE IT OFFICIAL
         store.updateCurrentList();
     }
-    // THIS FUNCTION MOVES A SONG IN THE CURRENT LIST FROM
-    // start TO end AND ADJUSTS ALL OTHER ITEMS ACCORDINGLY
+
     store.moveSong = function(start, end) {
         let list = store.currentList;
 
-        // WE NEED TO UPDATE THE STATE FOR THE APP
         if (start < end) {
             let temp = list.songs[start];
             for (let i = start; i < end; i++) {
@@ -757,19 +721,15 @@ store.createNewList = async function () {
             list.songs[end] = temp;
         }
 
-        // NOW MAKE IT OFFICIAL
         store.updateCurrentList();
     }
-    // THIS FUNCTION REMOVES THE SONG AT THE index LOCATION
-    // FROM THE CURRENT LIST
+
     store.removeSong = function(index) {
         let list = store.currentList;      
         list.songs.splice(index, 1); 
 
-        // NOW MAKE IT OFFICIAL
         store.updateCurrentList();
     }
-    // THIS FUNCTION UPDATES THE TEXT IN THE ITEM AT index TO text
     store.updateSong = function(index, songData) {
         let list = store.currentList;
         let song = list.songs[index];
@@ -778,7 +738,6 @@ store.createNewList = async function () {
         song.year = songData.year;
         song.youTubeId = songData.youTubeId;
 
-        // NOW MAKE IT OFFICIAL
         store.updateCurrentList();
     }
     store.addNewSong = () => {
@@ -786,9 +745,7 @@ store.createNewList = async function () {
         store.addCreateSongTransaction(
             playlistSize, "Untitled", "?", new Date().getFullYear(), "dQw4w9WgXcQ");
     }
-    // THIS FUNCDTION ADDS A CreateSong_Transaction TO THE TRANSACTION STACK
     store.addCreateSongTransaction = (index, title, artist, year, youTubeId) => {
-        // ADD A SONG ITEM AND ITS NUMBER
         let song = sanitizeSongInput({
             title: title,
             artist: artist,
@@ -802,10 +759,7 @@ store.createNewList = async function () {
         let transaction = new MoveSong_Transaction(store, start, end);
         tps.processTransaction(transaction);
     }
-    // THIS FUNCTION ADDS A RemoveSong_Transaction TO THE TRANSACTION STACK
     store.addRemoveSongTransaction = (song, index) => {
-        //let index = store.currentSongIndex;
-        //let song = store.currentList.songs[index];
         let transaction = new RemoveSong_Transaction(store, index, song);
         tps.processTransaction(transaction);
     }
@@ -852,7 +806,6 @@ store.createNewList = async function () {
         return (store.currentList !== null);
     }
 
-    // THIS FUNCTION ENABLES THE PROCESS OF EDITING A LIST NAME
     store.setIsListNameEditActive = function () {
         storeReducer({
             type: GlobalStoreActionType.SET_LIST_NAME_EDIT_ACTIVE,

@@ -91,7 +91,7 @@ const PlayPlaylistOverlay = () => {
                 playerRef.current = null;
             }
         };
-    }, [store.playerOverlayActive, playlist]); // eslint-disable-line react-hooks/exhaustive-deps
+    }, [store.playerOverlayActive, playlist]); 
 
     useEffect(() => {
         if (!playerReady || !playerRef.current || !currentSong) return;

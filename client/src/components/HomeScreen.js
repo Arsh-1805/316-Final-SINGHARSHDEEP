@@ -22,13 +22,6 @@ import InputLabel from '@mui/material/InputLabel';
 import Select from '@mui/material/Select';
 import MenuItem from '@mui/material/MenuItem';
 
-/*
-    Playlists screen. Lists all playlists owned by the user
-    (or visible to the user) and provides search + create.
-
-    We’re now matching the PDF more closely with a left
-    search panel and a right playlist list panel.
-*/
 const HomeScreen = () => {
     const { store } = useContext(GlobalStoreContext);
     const { auth } = useContext(AuthContext);
@@ -43,8 +36,6 @@ const HomeScreen = () => {
 
     useEffect(() => {
         store.loadIdNamePairs();
-        // We only need to fetch once when the screen mounts or when the page reloads.
-        // eslint-disable-next-line react-hooks/exhaustive-deps
     }, []);
 
     function handleCreateNewList() {

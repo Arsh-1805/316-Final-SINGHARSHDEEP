@@ -14,11 +14,9 @@ function SongCard(props) {
     const { auth } = useContext(AuthContext);
 
     const { song, index, readOnly } = props;  
-    // readOnly is passed from WorkspaceScreen for guest mode
 
     const isGuest = readOnly || !auth.loggedIn;
 
-    /** DRAG-DROP EVENTS — disabled for guests **/
     function handleDragStart(event) {
         if (isGuest) return;
         event.dataTransfer.setData("song", index);
@@ -47,7 +45,6 @@ function SongCard(props) {
         store.addMoveSongTransaction(sourceIndex, targetIndex);
     }
 
-    /** SONG ACTIONS **/
     function handleRemoveSong(event) {
         if (isGuest) return;
         store.addRemoveSongTransaction(song, index);

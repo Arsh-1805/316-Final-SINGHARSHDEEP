@@ -6,7 +6,6 @@ async function registerUser(req, res) {
   try {
     const { email, userName, password, passwordVerify, avatar } = req.body;
 
-    // basic validation
     if (!email || !userName || !password || !passwordVerify || !avatar) {
       return res
         .status(400)

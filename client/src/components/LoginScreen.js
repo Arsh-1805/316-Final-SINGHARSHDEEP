@@ -46,7 +46,7 @@ export default function LoginScreen() {
             sx={{
               p: 4,
               width: "100%",
-              bgcolor: "#fffbe6", // pale yellow to match Create Account
+              bgcolor: "#fffbe6", 
             }}
           >
             <Box
