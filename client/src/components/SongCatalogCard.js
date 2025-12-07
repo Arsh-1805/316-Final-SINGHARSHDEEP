@@ -1,4 +1,5 @@
 import { useState } from 'react';
+import { normalizeYouTubeId } from '../utils/youtube';
 import Box from '@mui/material/Box';
 import Paper from '@mui/material/Paper';
 import Typography from '@mui/material/Typography';
@@ -67,6 +68,15 @@ const SongCatalogCard = ({
         closeMenus();
     };
 
+    const rawLink = (song.youTubeId ?? '').toString().trim();
+    const isFullUrl = /^https?:\/\//i.test(rawLink);
+    const normalizedId = normalizeYouTubeId(rawLink);
+    const youtubeUrl = isFullUrl
+        ? rawLink
+        : normalizedId
+            ? `https://www.youtube.com/watch?v=${normalizedId}`
+            : '';
+
     return (
         <Paper
             elevation={2}
@@ -102,15 +112,26 @@ const SongCatalogCard = ({
                 <Box sx={{ display: 'flex', alignItems: 'center', gap: 1, mt: 1 }}>
                     {song.year && <Chip size="small" label={song.year} />}
                     {song.youTubeId && (
-                        <IconButton
-                            size="small"
-                            component="a"
-                            href={`https://www.youtube.com/watch?v=${song.youTubeId}`}
-                            target="_blank"
-                            rel="noopener noreferrer"
-                        >
-                            <OpenInNewIcon fontSize="small" />
-                        </IconButton>
+                        youtubeUrl ? (
+                            <IconButton
+                                size="small"
+                                component="a"
+                                href={youtubeUrl}
+                                target="_blank"
+                                rel="noopener noreferrer"
+                                onClick={(event) => event.stopPropagation()}
+                            >
+                                <OpenInNewIcon fontSize="small" />
+                            </IconButton>
+                        ) : (
+                            <Tooltip title="Invalid YouTube link">
+                                <span>
+                                    <IconButton size="small" disabled>
+                                        <OpenInNewIcon fontSize="small" />
+                                    </IconButton>
+                                </span>
+                            </Tooltip>
+                        )
                     )}
                 </Box>
             </Box>

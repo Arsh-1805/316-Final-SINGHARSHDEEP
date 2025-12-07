@@ -52,7 +52,7 @@ async function resetMongo() {
                 S("Pink + White", "Frank Ocean", 2016, "O8cDfnQDikQ"),
                 S("Location", "Khalid", 2017, "by3yRdlQvzs"),
                 S("For Tonight", "Giveon", 2021, "bDqu1Z1xqs8"),
-                S("Outta Time", "Bryson Tiller ft. Drake", 2020, "P39BQlUFnQo"),
+                S("Outta Time", "Bryson Tiller ft. Drake", 2020, "https://www.youtube.com/watch?v=FtaW6YMAafk&list=RDFtaW6YMAafk&start_radio=1"),
                 S("From Time", "Drake ft. Jhene Aiko", 2013, "6PyP8p21xuM"),
                 S("Street Lights", "Kanye West", 2008, "6OdO9a4D0xY"),
                 S("Lost", "Frank Ocean", 2012, "tfj0A9bJSgI"),
@@ -107,7 +107,7 @@ async function resetMongo() {
                 S("Call Out My Name", "The Weeknd", 2018, "M3mJkSqZbX4"),
                 S("Peach", "Kevin Abstract", 2019, "Haxzq1JTM4E"),
                 S("Shot For Me", "Drake", 2011, "sJYJkPzH_Lo"),
-                S("Outta Time", "Bryson Tiller ft. Drake", 2020, "P39BQlUFnQo"),
+                S("Outta Time", "Bryson Tiller ft. Drake", 2020, "https://www.youtube.com/watch?v=FtaW6YMAafk&list=RDFtaW6YMAafk&start_radio=1"),
                 S("Do Not Disturb", "Drake", 2017, "lZ5wQ6zU4gA"),
                 S("Loose", "Daniel Caesar", 2017, "ClnbgQ7WR_U"),
                 S("Crew", "GoldLink ft. Brent Faiyaz & Shy Glizzy", 2017, "nhNqbe6QENY"),
@@ -145,4 +145,3 @@ mongoose
     .catch(e => {
         console.error('Connection error', e.message)
     })
-

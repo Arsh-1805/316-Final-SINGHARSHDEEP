@@ -34,6 +34,12 @@ export default function MUIEditSongModal() {
         setYouTubeId(currentSong.youTubeId || '');
     }, [currentSong]);
 
+    const isFormComplete =
+        title.trim().length > 0 &&
+        artist.trim().length > 0 &&
+        year.trim().length > 0 &&
+        youTubeId.trim().length > 0;
+
     function handleConfirmEditSong() {
         let newSongData = {
             title: title,
@@ -98,8 +104,8 @@ export default function MUIEditSongModal() {
                 YouTubeId: <input id="edit-song-modal-youTubeId-textfield" className='modal-textfield' type="text" value={youTubeId} onChange={handleUpdateYouTubeId} />
             </Typography>
             <Button 
-                sx={{color: "#8932CC", backgroundColor: "#CBC3E3", fontSize: 13, fontWeight: 'bold', border: 2, p:"5px", mt:"20px"}} variant="outlined" 
-                id="edit-song-confirm-button" onClick={handleConfirmEditSong}>Confirm</Button>
+                sx={{color: isFormComplete ? "#fff" : "#999", backgroundColor: isFormComplete ? "#4caf50" : "#d0d0d0", fontSize: 13, fontWeight: 'bold', border: 2, p:"5px", mt:"20px"}} variant="contained" 
+                id="edit-song-confirm-button" onClick={handleConfirmEditSong} disabled={!isFormComplete}>Complete</Button>
             <Button 
                 sx={{opacity: 0.80, color: "#8932CC", backgroundColor: "#CBC3E3", fontSize: 13, fontWeight: 'bold', border: 2, p:"5px", mt:"20px", ml:"197px"}} variant="outlined" 
                 id="edit-song-confirm-button" onClick={handleCancelEditSong}>Cancel</Button>

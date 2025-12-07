@@ -1,5 +1,6 @@
 import { useContext, useEffect, useRef, useState } from 'react';
 import { GlobalStoreContext } from '../store';
+import { normalizeYouTubeId } from '../utils/youtube';
 
 import Box from '@mui/material/Box';
 import Paper from '@mui/material/Paper';
@@ -43,6 +44,7 @@ const PlayPlaylistOverlay = () => {
 
     const songs = playlist?.songs || [];
     const currentSong = songs[store.playerSongIndex] || null;
+    const videoId = currentSong ? normalizeYouTubeId(currentSong.youTubeId) : '';
 
     useEffect(() => {
         let mounted = true;
@@ -52,14 +54,14 @@ const PlayPlaylistOverlay = () => {
             playerRef.current = new YT.Player(playerContainerRef.current, {
                 height: "390",
                 width: "640",
-                videoId: currentSong ? currentSong.youTubeId : "",
+                videoId: videoId,
                 events: {
                     onReady: () => {
                         if (!mounted) return;
                         setPlayerReady(true);
                         setIsPaused(false);
-                        if (currentSong) {
-                            playerRef.current.loadVideoById(currentSong.youTubeId);
+                        if (videoId) {
+                            playerRef.current.loadVideoById(videoId);
                         }
                     },
                     onStateChange: (event) => {
@@ -93,9 +95,9 @@ const PlayPlaylistOverlay = () => {
 
     useEffect(() => {
         if (!playerReady || !playerRef.current || !currentSong) return;
-        playerRef.current.loadVideoById(currentSong.youTubeId);
+        playerRef.current.loadVideoById(videoId);
         setIsPaused(false);
-    }, [playerReady, currentSong]);
+    }, [playerReady, currentSong, videoId]);
 
     if (!store.playerOverlayActive || !playlist) {
         return null;

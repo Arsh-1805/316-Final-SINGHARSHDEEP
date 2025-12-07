@@ -51,6 +51,19 @@ const CurrentModal = {
 
 const MAX_RECENT_PLAYLISTS = 8;
 
+const sanitizeSongInput = (song = {}) => {
+    const title = (song.title ?? '').toString().trim();
+    const artist = (song.artist ?? '').toString().trim();
+    const year = (song.year ?? '').toString().trim();
+    const youTubeId = (song.youTubeId ?? '').toString().trim();
+    return {
+        title: title || 'Untitled',
+        artist: artist || 'Unknown Artist',
+        year,
+        youTubeId
+    };
+};
+
 const addPlaylistToRecents = (recents, playlist) => {
     if (!playlist || !playlist._id) return recents;
     const entry = {
@@ -434,14 +447,9 @@ store.createNewList = async function () {
                     return { success: false, error: 'Could not load playlist' };
                 }
                 const playlist = response.data.playlist;
-                const sanitizedSong = {
-                    title: songData.title,
-                    artist: songData.artist,
-                    year: songData.year,
-                    youTubeId: songData.youTubeId
-                };
-                playlist.songs = Array.isArray(playlist.songs) ? playlist.songs : [];
-                playlist.songs.push(sanitizedSong);
+        const sanitizedSong = sanitizeSongInput(songData);
+        playlist.songs = Array.isArray(playlist.songs) ? playlist.songs : [];
+        playlist.songs.push(sanitizedSong);
 
                 const updateResponse = await storeRequestSender.updatePlaylistById(id, playlist);
                 if (updateResponse?.data?.success) {
@@ -495,6 +503,7 @@ store.createNewList = async function () {
             return { success: false, error: 'No playlists to update.' };
         }
         let updatedCount = 0;
+        const sanitizedUpdatedSong = sanitizeSongInput(updatedSong);
         for (const id of uniqueIds) {
             const playlist = await loadPlaylistById(id);
             if (!playlist) continue;
@@ -502,12 +511,7 @@ store.createNewList = async function () {
             playlist.songs = (playlist.songs || []).map((song) => {
                 if (songsEqual(song, originalSong)) {
                     changed = true;
-                    return {
-                        title: updatedSong.title?.trim() || 'Untitled',
-                        artist: updatedSong.artist?.trim() || 'Unknown Artist',
-                        year: updatedSong.year?.toString() || '',
-                        youTubeId: updatedSong.youTubeId?.trim() || ''
-                    };
+                    return { ...sanitizedUpdatedSong };
                 }
                 return song;
             });
@@ -545,9 +549,15 @@ store.createNewList = async function () {
     }
 
     store.openPlayerOverlay = function(playlist, songIndex = 0) {
+        const sanitizedPlaylist = playlist
+            ? {
+                ...playlist,
+                songs: (playlist.songs || []).map((song) => sanitizeSongInput(song))
+            }
+            : playlist;
         storeReducer({
             type: GlobalStoreActionType.SET_PLAYER_OVERLAY,
-            payload: { playlist, songIndex }
+            payload: { playlist: sanitizedPlaylist, songIndex }
         });
     }
 
@@ -779,12 +789,12 @@ store.createNewList = async function () {
     // THIS FUNCDTION ADDS A CreateSong_Transaction TO THE TRANSACTION STACK
     store.addCreateSongTransaction = (index, title, artist, year, youTubeId) => {
         // ADD A SONG ITEM AND ITS NUMBER
-        let song = {
+        let song = sanitizeSongInput({
             title: title,
             artist: artist,
             year: year,
             youTubeId: youTubeId
-        };
+        });
         let transaction = new CreateSong_Transaction(store, index, song);
         tps.processTransaction(transaction);
     }    
@@ -807,7 +817,8 @@ store.createNewList = async function () {
             year: song.year,
             youTubeId: song.youTubeId
         };
-        let transaction = new UpdateSong_Transaction(this, index, oldSongData, newSongData);        
+        const sanitizedNewSong = sanitizeSongInput(newSongData);
+        let transaction = new UpdateSong_Transaction(this, index, oldSongData, sanitizedNewSong);        
         tps.processTransaction(transaction);
     }
     store.updateCurrentList = function() {

@@ -14,6 +14,7 @@ import FormControl from '@mui/material/FormControl';
 import InputLabel from '@mui/material/InputLabel';
 import Select from '@mui/material/Select';
 import MenuItem from '@mui/material/MenuItem';
+import Modal from '@mui/material/Modal';
 import Dialog from '@mui/material/Dialog';
 import DialogTitle from '@mui/material/DialogTitle';
 import DialogContent from '@mui/material/DialogContent';
@@ -22,6 +23,7 @@ import DialogActions from '@mui/material/DialogActions';
 import { GlobalStoreContext } from '../store';
 import AuthContext from '../auth';
 import SongCatalogCard from './SongCatalogCard';
+import { normalizeYouTubeId } from '../utils/youtube';
 
 const buildSongCatalogKey = (song) => {
     if (!song) return '';
@@ -65,15 +67,23 @@ const SongsScreen = () => {
     const { store } = useContext(GlobalStoreContext);
     const { auth } = useContext(AuthContext);
 
+    const emptySongForm = () => ({ title: '', artist: '', year: '', youTubeId: '' });
+
     const [titleFilter, setTitleFilter] = useState('');
     const [artistFilter, setArtistFilter] = useState('');
     const [yearFilter, setYearFilter] = useState('');
     const [snackbarState, setSnackbarState] = useState({ open: false, message: '', severity: 'success' });
     const [sortOption, setSortOption] = useState('listenersHigh');
-    const [editDialogState, setEditDialogState] = useState({ open: false, entry: null, form: { title: '', artist: '', year: '', youTubeId: '' } });
+    const [editDialogState, setEditDialogState] = useState({ open: false, entry: null, form: emptySongForm() });
     const [removeDialogState, setRemoveDialogState] = useState({ open: false, entry: null });
-    const [newSongDialog, setNewSongDialog] = useState({ open: false, form: { title: '', artist: '', year: '', youTubeId: '' }, playlistId: '' });
+    const [newSongDialog, setNewSongDialog] = useState({ open: false, form: emptySongForm() });
     const [selectedSongKey, setSelectedSongKey] = useState(null);
+    const formIsComplete = (form) =>
+        ['title', 'artist', 'year', 'youTubeId'].every(
+            (field) => (form[field] ?? '').toString().trim().length > 0
+        );
+    const isEditFormComplete = formIsComplete(editDialogState.form);
+    const isNewSongFormComplete = formIsComplete(newSongDialog.form);
 
     useEffect(() => {
         if (!store.idNamePairs.length) {
@@ -157,6 +167,8 @@ const SongsScreen = () => {
         return songEntries.find((entry) => buildSongCatalogKey(entry.song) === selectedSongKey) || null;
     }, [songEntries, selectedSongKey]);
 
+    const previewVideoId = selectedEntry ? normalizeYouTubeId(selectedEntry.song.youTubeId) : '';
+
     useEffect(() => {
         if (!filteredSongs.length) {
             setSelectedSongKey(null);
@@ -203,7 +215,7 @@ const SongsScreen = () => {
     };
 
     const closeEditDialog = () =>
-        setEditDialogState({ open: false, entry: null, form: { title: '', artist: '', year: '', youTubeId: '' } });
+        setEditDialogState({ open: false, entry: null, form: emptySongForm() });
 
     const closeRemoveDialog = () => setRemoveDialogState({ open: false, entry: null });
 
@@ -211,15 +223,21 @@ const SongsScreen = () => {
         setEditDialogState((prev) => ({ ...prev, form: { ...prev.form, [field]: value } }));
 
     const submitSongEdit = async () => {
-        if (!editDialogState.entry) return;
+        if (!editDialogState.entry || !isEditFormComplete) return;
+        const trimmed = {
+            title: editDialogState.form.title.trim(),
+            artist: editDialogState.form.artist.trim(),
+            year: editDialogState.form.year.trim(),
+            youTubeId: editDialogState.form.youTubeId.trim()
+        };
         const result = await store.updateSongInPlaylists(
             editDialogState.entry.ownerPlaylistIds,
             editDialogState.entry.song,
-            editDialogState.form
+            trimmed
         );
         if (result?.success) {
             pushSnackbar(
-                `Updated "${editDialogState.form.title}" in ${result.updatedCount} playlist${result.updatedCount === 1 ? '' : 's'}.`
+                `Updated "${trimmed.title}" in ${result.updatedCount} playlist${result.updatedCount === 1 ? '' : 's'}.`
             );
         } else {
             pushSnackbar(result?.error || 'Could not update song.', 'error');
@@ -254,47 +272,50 @@ const SongsScreen = () => {
             pushSnackbar('Create or open one of your playlists before adding a new song.', 'info');
             return;
         }
-        const defaultPlaylist = playlistOptions[0]?._id || '';
         setNewSongDialog({
             open: true,
-            playlistId: defaultPlaylist,
-            form: { title: '', artist: '', year: '', youTubeId: '' }
+            form: emptySongForm()
         });
     };
 
     const closeNewSongDialog = () =>
-        setNewSongDialog({ open: false, playlistId: '', form: { title: '', artist: '', year: '', youTubeId: '' } });
+        setNewSongDialog({ open: false, form: emptySongForm() });
 
     const handleNewSongField = (field, value) =>
         setNewSongDialog((prev) => ({ ...prev, form: { ...prev.form, [field]: value } }));
 
-    const handleNewSongPlaylist = (value) => setNewSongDialog((prev) => ({ ...prev, playlistId: value }));
-
     const submitNewSong = async () => {
-        const { form, playlistId } = newSongDialog;
-        if (!playlistId) {
-            pushSnackbar('Please choose a playlist for the new song.', 'warning');
+        if (!canAddSongs) {
+            pushSnackbar('Create or open one of your playlists before adding a new song.', 'info');
             return;
         }
-        const requiredFields = form.title.trim() && form.artist.trim() && form.year.trim();
-        if (!requiredFields) {
-            pushSnackbar('Title, Artist, and Year are required.', 'warning');
+        const targetPlaylist = playlistOptions[0];
+        if (!targetPlaylist) {
+            pushSnackbar('No playlist available to store this song yet.', 'warning');
             return;
         }
-        const songData = {
+
+        const { form } = newSongDialog;
+        const trimmed = {
             title: form.title.trim(),
             artist: form.artist.trim(),
             year: form.year.trim(),
             youTubeId: form.youTubeId.trim()
         };
-        const newKey = buildSongCatalogKey(songData);
+        const requiredFields = trimmed.title && trimmed.artist && trimmed.year && trimmed.youTubeId;
+        if (!requiredFields) {
+            pushSnackbar('Please provide Title, Artist, Year, and a YouTube link.', 'warning');
+            return;
+        }
+
+        const newKey = buildSongCatalogKey(trimmed);
         if (catalogKeySet.has(newKey)) {
             pushSnackbar('A song with that Title, Artist, and Year already exists.', 'warning');
             return;
         }
-        const result = await store.addSongToPlaylist(playlistId, songData);
+        const result = await store.addSongToPlaylist(targetPlaylist._id, trimmed);
         if (result?.success) {
-            pushSnackbar(`Created "${songData.title}" and added it to the selected playlist.`);
+            pushSnackbar(`Created "${trimmed.title}" and stored it with ${targetPlaylist.name}.`);
             closeNewSongDialog();
         } else {
             pushSnackbar('Could not create the song. Please try again.', 'error');
@@ -359,9 +380,6 @@ const SongsScreen = () => {
                     <Typography variant="h5" sx={{ fontWeight: 'bold', color: '#d100d1' }}>
                         Songs Catalog
                     </Typography>
-                    <Typography variant="body2" color="text.secondary">
-                        Search for songs by title, artist, or year. Use the action menu on each card to drop the song into one of your playlists.
-                    </Typography>
                     {renderTextField('Song Title', titleFilter, setTitleFilter)}
                     {renderTextField('Song Artist', artistFilter, setArtistFilter)}
                     {renderTextField('Song Year', yearFilter, setYearFilter)}
@@ -409,7 +427,7 @@ const SongsScreen = () => {
                         <Typography variant="subtitle1" sx={{ fontWeight: 'bold', color: '#6a1b9a' }}>
                             Preview
                         </Typography>
-                        {selectedEntry && selectedEntry.song.youTubeId ? (
+                        {previewVideoId ? (
                             <Box
                                 sx={{
                                     position: 'relative',
@@ -420,10 +438,10 @@ const SongsScreen = () => {
                                     overflow: 'hidden',
                                     boxShadow: 1
                                 }}
-                            >
-                                <iframe
-                                    title={`${selectedEntry.song.title} preview`}
-                                    src={`https://www.youtube.com/embed/${selectedEntry.song.youTubeId}`}
+                                >
+                                    <iframe
+                                        title={`${selectedEntry.song.title} preview`}
+                                        src={`https://www.youtube.com/embed/${previewVideoId}`}
                                     frameBorder="0"
                                     allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
                                     allowFullScreen
@@ -552,35 +570,15 @@ const SongsScreen = () => {
                 </Alert>
             </Snackbar>
 
-            <Dialog open={editDialogState.open} onClose={closeEditDialog} maxWidth="sm" fullWidth>
-                <DialogTitle>Edit Song</DialogTitle>
-                <DialogContent sx={{ display: 'flex', flexDirection: 'column', gap: 2, mt: 1 }}>
-                    <TextField
-                        label="Title"
-                        value={editDialogState.form.title}
-                        onChange={(e) => handleEditFieldChange('title', e.target.value)}
-                    />
-                    <TextField
-                        label="Artist"
-                        value={editDialogState.form.artist}
-                        onChange={(e) => handleEditFieldChange('artist', e.target.value)}
-                    />
-                    <TextField
-                        label="Year"
-                        value={editDialogState.form.year}
-                        onChange={(e) => handleEditFieldChange('year', e.target.value)}
-                    />
-                    <TextField
-                        label="YouTube ID"
-                        value={editDialogState.form.youTubeId}
-                        onChange={(e) => handleEditFieldChange('youTubeId', e.target.value)}
-                    />
-                </DialogContent>
-                <DialogActions>
-                    <Button onClick={closeEditDialog}>Cancel</Button>
-                    <Button variant="contained" onClick={submitSongEdit}>Save</Button>
-                </DialogActions>
-            </Dialog>
+            <SongMetadataModal
+                open={editDialogState.open}
+                heading="Edit Song"
+                form={editDialogState.form}
+                onFieldChange={handleEditFieldChange}
+                onCancel={closeEditDialog}
+                onConfirm={submitSongEdit}
+                confirmDisabled={!isEditFormComplete}
+            />
 
             <Dialog open={removeDialogState.open} onClose={closeRemoveDialog}>
                 <DialogTitle>Remove Song from Catalog</DialogTitle>
@@ -597,57 +595,99 @@ const SongsScreen = () => {
                 </DialogActions>
             </Dialog>
 
-            <Dialog open={newSongDialog.open} onClose={closeNewSongDialog} maxWidth="sm" fullWidth>
-                <DialogTitle>Add a New Song</DialogTitle>
-                <DialogContent sx={{ display: 'flex', flexDirection: 'column', gap: 2, mt: 1 }}>
-                    <TextField
-                        label="Title"
-                        value={newSongDialog.form.title}
-                        onChange={(e) => handleNewSongField('title', e.target.value)}
-                        required
-                    />
-                    <TextField
-                        label="Artist"
-                        value={newSongDialog.form.artist}
-                        onChange={(e) => handleNewSongField('artist', e.target.value)}
-                        required
-                    />
-                    <TextField
-                        label="Year"
-                        value={newSongDialog.form.year}
-                        onChange={(e) => handleNewSongField('year', e.target.value)}
-                        required
-                    />
-                    <TextField
-                        label="YouTube ID"
-                        value={newSongDialog.form.youTubeId}
-                        onChange={(e) => handleNewSongField('youTubeId', e.target.value)}
-                    />
-                    <FormControl fullWidth>
-                        <InputLabel id="new-song-playlist-label">Playlist</InputLabel>
-                        <Select
-                            labelId="new-song-playlist-label"
-                            label="Playlist"
-                            value={newSongDialog.playlistId}
-                            onChange={(e) => handleNewSongPlaylist(e.target.value)}
-                        >
-                            {playlistOptions.map((option) => (
-                                <MenuItem key={option._id} value={option._id}>
-                                    {option.name}
-                                </MenuItem>
-                            ))}
-                        </Select>
-                    </FormControl>
-                </DialogContent>
-                <DialogActions>
-                    <Button onClick={closeNewSongDialog}>Cancel</Button>
-                    <Button variant="contained" onClick={submitNewSong} disabled={!canAddSongs}>
-                        Complete
-                    </Button>
-                </DialogActions>
-            </Dialog>
+            <SongMetadataModal
+                open={newSongDialog.open}
+                heading="Add Song to Catalog"
+                form={newSongDialog.form}
+                onFieldChange={handleNewSongField}
+                onCancel={closeNewSongDialog}
+                onConfirm={submitNewSong}
+                confirmDisabled={!isNewSongFormComplete || !canAddSongs}
+                helperText={
+                    playlistOptions[0]
+                        ? `New entries are staged with "${playlistOptions[0].name}" so they appear in your catalog.`
+                        : 'Open or create a playlist first so we can store catalog entries.'
+                }
+            />
         </Box>
     );
 };
+
+const modalStyle = {
+    position: 'absolute',
+    top: '50%',
+    left: '50%',
+    transform: 'translate(-50%, -50%)',
+    width: 420,
+    bgcolor: '#d8ffd8',
+    borderRadius: 3,
+    boxShadow: 24,
+    p: 4,
+};
+
+const SongMetadataModal = ({
+    open,
+    heading,
+    form,
+    onFieldChange,
+    onCancel,
+    onConfirm,
+    confirmDisabled,
+    helperText
+}) => (
+    <Modal open={open} onClose={onCancel}>
+        <Box sx={modalStyle}>
+            <Typography variant="h5" sx={{ fontWeight: 'bold', color: '#4a148c' }}>
+                {heading}
+            </Typography>
+            <Divider sx={{ my: 2, borderBottomWidth: 3 }} />
+            <Box sx={{ display: 'flex', flexDirection: 'column', gap: 2 }}>
+                <TextField
+                    label="Title"
+                    value={form.title}
+                    onChange={(event) => onFieldChange('title', event.target.value)}
+                    autoFocus
+                />
+                <TextField
+                    label="Artist"
+                    value={form.artist}
+                    onChange={(event) => onFieldChange('artist', event.target.value)}
+                />
+                <TextField
+                    label="Year"
+                    value={form.year}
+                    onChange={(event) => onFieldChange('year', event.target.value)}
+                />
+                <TextField
+                    label="YouTube Id or Link"
+                    value={form.youTubeId}
+                    onChange={(event) => onFieldChange('youTubeId', event.target.value)}
+                />
+            </Box>
+            {helperText && (
+                <Typography variant="body2" color="text.secondary" sx={{ mt: 1 }}>
+                    {helperText}
+                </Typography>
+            )}
+            <Box sx={{ display: 'flex', justifyContent: 'space-between', mt: 3 }}>
+                <Button
+                    variant="contained"
+                    onClick={onConfirm}
+                    disabled={confirmDisabled}
+                    sx={{
+                        bgcolor: confirmDisabled ? '#cfcfcf' : '#2e7d32',
+                        color: confirmDisabled ? '#777' : '#fff',
+                        fontWeight: 'bold'
+                    }}
+                >
+                    Complete
+                </Button>
+                <Button variant="outlined" onClick={onCancel} sx={{ borderColor: '#4a148c', color: '#4a148c' }}>
+                    Cancel
+                </Button>
+            </Box>
+        </Box>
+    </Modal>
+);
 
 export default SongsScreen;

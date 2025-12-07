@@ -1,6 +1,7 @@
 import { useContext } from 'react';
 import { GlobalStoreContext } from '../store';
 import AuthContext from '../auth';
+import { normalizeYouTubeId } from '../utils/youtube';
 import Box from '@mui/material/Box';
 import IconButton from '@mui/material/IconButton';
 import Typography from '@mui/material/Typography';
@@ -69,6 +70,15 @@ function SongCard(props) {
         store.addCreateSongTransaction(index + 1, song.title, song.artist, song.year, song.youTubeId);
     }
 
+    const rawLink = (song.youTubeId ?? '').toString().trim();
+    const isFullUrl = /^https?:\/\//i.test(rawLink);
+    const videoId = normalizeYouTubeId(rawLink);
+    const youtubeUrl = isFullUrl
+        ? rawLink
+        : videoId
+            ? `https://www.youtube.com/watch?v=${videoId}`
+            : undefined;
+
     return (
         <Box
             key={index}
@@ -110,10 +120,15 @@ function SongCard(props) {
             <Box sx={{ flexGrow: 1 }}>
                 <Typography
                     id={'song-' + index + '-link'}
-                    component="a"
-                    href={"https://www.youtube.com/watch?v=" + song.youTubeId}
-                    target="_blank"
-                    rel="noopener noreferrer"
+                    component={youtubeUrl ? "a" : "span"}
+                    href={youtubeUrl}
+                    target={youtubeUrl ? "_blank" : undefined}
+                    rel={youtubeUrl ? "noopener noreferrer" : undefined}
+                    onClick={(event) => {
+                        if (!youtubeUrl) {
+                            event.preventDefault();
+                        }
+                    }}
                     sx={{
                         textDecoration: "none",
                         color: "#4e342e",
