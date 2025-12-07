@@ -23,6 +23,11 @@ import { GlobalStoreContext } from '../store';
 import AuthContext from '../auth';
 import SongCatalogCard from './SongCatalogCard';
 
+const buildSongCatalogKey = (song) => {
+    if (!song) return '';
+    const normalize = (value) => (value || '').toString().trim().toLowerCase();
+    return `${normalize(song.title)}||${normalize(song.artist)}||${normalize(song.year)}`;
+};
 const useSongCatalogEntries = (pairs, userEmail) =>
     useMemo(() => {
         const byKey = new Map();
@@ -31,7 +36,7 @@ const useSongCatalogEntries = (pairs, userEmail) =>
             const playlistId = pair._id;
             const isOwner = userEmail && pair.ownerEmail === userEmail;
             (pair.songs || []).forEach((song) => {
-                const key = `${song.title || ''}||${song.artist || ''}||${song.year || ''}||${song.youTubeId || ''}`;
+                const key = buildSongCatalogKey(song);
                 if (!byKey.has(key)) {
                     byKey.set(key, {
                         song,
@@ -81,19 +86,27 @@ const SongsScreen = () => {
     const sortComparators = {
         listenersHigh: (a, b) => (b.listeners || 0) - (a.listeners || 0),
         listenersLow: (a, b) => (a.listeners || 0) - (b.listeners || 0),
+        playlistsHigh: (a, b) => (b.playlistCount || 0) - (a.playlistCount || 0),
+        playlistsLow: (a, b) => (a.playlistCount || 0) - (b.playlistCount || 0),
         titleAZ: (a, b) => (a.song.title || '').localeCompare(b.song.title || ''),
         titleZA: (a, b) => (b.song.title || '').localeCompare(a.song.title || ''),
         artistAZ: (a, b) => (a.song.artist || '').localeCompare(b.song.artist || ''),
         artistZA: (a, b) => (b.song.artist || '').localeCompare(a.song.artist || ''),
+        yearHigh: (a, b) => Number(b.song.year || 0) - Number(a.song.year || 0),
+        yearLow: (a, b) => Number(a.song.year || 0) - Number(b.song.year || 0)
     };
 
     const sortOptionsList = [
         { value: 'listenersHigh', label: 'Listeners (Hi-Lo)' },
         { value: 'listenersLow', label: 'Listeners (Lo-Hi)' },
+        { value: 'playlistsHigh', label: 'Playlists (Hi-Lo)' },
+        { value: 'playlistsLow', label: 'Playlists (Lo-Hi)' },
         { value: 'titleAZ', label: 'Title (A-Z)' },
         { value: 'titleZA', label: 'Title (Z-A)' },
         { value: 'artistAZ', label: 'Artist (A-Z)' },
         { value: 'artistZA', label: 'Artist (Z-A)' },
+        { value: 'yearHigh', label: 'Year (Hi-Lo)' },
+        { value: 'yearLow', label: 'Year (Lo-Hi)' },
     ];
 
     const filteredSongs = useMemo(() => {
@@ -132,6 +145,10 @@ const SongsScreen = () => {
     }, [auth.loggedIn, auth.user, store.idNamePairs, store.recentPlaylists]);
 
     const canAddSongs = auth.loggedIn && playlistOptions.length > 0;
+
+    const catalogKeySet = useMemo(() => new Set(
+        songEntries.map((entry) => buildSongCatalogKey(entry.song))
+    ), [songEntries]);
 
     const pushSnackbar = (message, severity = 'success') =>
         setSnackbarState({ open: true, message, severity });
@@ -239,9 +256,9 @@ const SongsScreen = () => {
             pushSnackbar('Please choose a playlist for the new song.', 'warning');
             return;
         }
-        const requiredFields = form.title.trim() && form.artist.trim();
+        const requiredFields = form.title.trim() && form.artist.trim() && form.year.trim();
         if (!requiredFields) {
-            pushSnackbar('Title and Artist are required.', 'warning');
+            pushSnackbar('Title, Artist, and Year are required.', 'warning');
             return;
         }
         const songData = {
@@ -250,6 +267,11 @@ const SongsScreen = () => {
             year: form.year.trim(),
             youTubeId: form.youTubeId.trim()
         };
+        const newKey = buildSongCatalogKey(songData);
+        if (catalogKeySet.has(newKey)) {
+            pushSnackbar('A song with that Title, Artist, and Year already exists.', 'warning');
+            return;
+        }
         const result = await store.addSongToPlaylist(playlistId, songData);
         if (result?.success) {
             pushSnackbar(`Created "${songData.title}" and added it to the selected playlist.`);
@@ -522,6 +544,7 @@ const SongsScreen = () => {
                         label="Year"
                         value={newSongDialog.form.year}
                         onChange={(e) => handleNewSongField('year', e.target.value)}
+                        required
                     />
                     <TextField
                         label="YouTube ID"
@@ -547,7 +570,7 @@ const SongsScreen = () => {
                 <DialogActions>
                     <Button onClick={closeNewSongDialog}>Cancel</Button>
                     <Button variant="contained" onClick={submitNewSong} disabled={!canAddSongs}>
-                        Save
+                        Complete
                     </Button>
                 </DialogActions>
             </Dialog>
