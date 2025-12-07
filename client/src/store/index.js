@@ -73,6 +73,17 @@ const renameRecentPlaylist = (recents, playlist) => {
     );
 };
 
+const songsEqual = (a, b) => {
+    if (!a || !b) return false;
+    const norm = (value) => (value ?? '').toString().trim();
+    return (
+        norm(a.title) === norm(b.title) &&
+        norm(a.artist) === norm(b.artist) &&
+        norm(a.year) === norm(b.year) &&
+        norm(a.youTubeId) === norm(b.youTubeId)
+    );
+};
+
 // WITH THIS WE'RE MAKING OUR GLOBAL DATA STORE
 // AVAILABLE TO THE REST OF THE APPLICATION
 function GlobalStoreContextProvider(props) {
@@ -456,6 +467,81 @@ store.createNewList = async function () {
             }
         }
         return asyncAdd(playlistId, song);
+    }
+
+    async function loadPlaylistById(id) {
+        let response = await storeRequestSender.getPlaylistById(id);
+        if (response?.data?.success) return response.data.playlist;
+        return null;
+    }
+
+    async function persistPlaylist(playlist) {
+        const updateResponse = await storeRequestSender.updatePlaylistById(playlist._id, playlist);
+        if (updateResponse?.data?.success) {
+            if (store.currentList && store.currentList._id === playlist._id) {
+                storeReducer({
+                    type: GlobalStoreActionType.SET_CURRENT_LIST,
+                    payload: { playlist, workspaceOverlayActive: store.workspaceOverlayActive }
+                });
+            }
+            return true;
+        }
+        return false;
+    }
+
+    store.updateSongInPlaylists = async function(playlistIds = [], originalSong, updatedSong) {
+        const uniqueIds = Array.from(new Set(playlistIds.filter(Boolean)));
+        if (uniqueIds.length === 0) {
+            return { success: false, error: 'No playlists to update.' };
+        }
+        let updatedCount = 0;
+        for (const id of uniqueIds) {
+            const playlist = await loadPlaylistById(id);
+            if (!playlist) continue;
+            let changed = false;
+            playlist.songs = (playlist.songs || []).map((song) => {
+                if (songsEqual(song, originalSong)) {
+                    changed = true;
+                    return {
+                        title: updatedSong.title?.trim() || 'Untitled',
+                        artist: updatedSong.artist?.trim() || 'Unknown Artist',
+                        year: updatedSong.year?.toString() || '',
+                        youTubeId: updatedSong.youTubeId?.trim() || ''
+                    };
+                }
+                return song;
+            });
+            if (changed && (await persistPlaylist(playlist))) {
+                updatedCount++;
+            }
+        }
+        if (updatedCount > 0) {
+            store.loadIdNamePairs({ keepCurrentList: true });
+            return { success: true, updatedCount };
+        }
+        return { success: false, error: 'No matching songs were found.' };
+    }
+
+    store.removeSongFromPlaylists = async function(playlistIds = [], targetSong) {
+        const uniqueIds = Array.from(new Set(playlistIds.filter(Boolean)));
+        if (uniqueIds.length === 0) {
+            return { success: false, error: 'No playlists to update.' };
+        }
+        let updatedCount = 0;
+        for (const id of uniqueIds) {
+            const playlist = await loadPlaylistById(id);
+            if (!playlist) continue;
+            const originalLength = playlist.songs ? playlist.songs.length : 0;
+            playlist.songs = (playlist.songs || []).filter((song) => !songsEqual(song, targetSong));
+            if (playlist.songs.length !== originalLength && (await persistPlaylist(playlist))) {
+                updatedCount++;
+            }
+        }
+        if (updatedCount > 0) {
+            store.loadIdNamePairs({ keepCurrentList: true });
+            return { success: true, updatedCount };
+        }
+        return { success: false, error: 'Song not found in your playlists.' };
     }
 
     store.openPlayerOverlay = function(playlist, songIndex = 0) {

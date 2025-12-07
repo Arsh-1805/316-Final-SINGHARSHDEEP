@@ -10,24 +10,60 @@ import Tooltip from '@mui/material/Tooltip';
 import MoreVertIcon from '@mui/icons-material/MoreVert';
 import OpenInNewIcon from '@mui/icons-material/OpenInNew';
 
-const SongCatalogCard = ({ song, playlists = [], onAdd, canAdd, listeners = 0, playlistCount = 0 }) => {
+const SongCatalogCard = ({
+    song,
+    playlists = [],
+    onAdd,
+    canAdd,
+    listeners = 0,
+    playlistCount = 0,
+    canEdit = false,
+    canRemove = false,
+    onEdit,
+    onRemove,
+}) => {
     const [anchorEl, setAnchorEl] = useState(null);
-    const disabled = !canAdd;
+    const [playlistMenuAnchor, setPlaylistMenuAnchor] = useState(null);
+    const menuDisabled = !canAdd && !canEdit && !canRemove;
 
     const handleOpenMenu = (event) => {
-        if (disabled) return;
+        if (menuDisabled) return;
         setAnchorEl(event.currentTarget);
     };
 
-    const handleCloseMenu = () => setAnchorEl(null);
+    const closeMenus = () => {
+        setAnchorEl(null);
+        setPlaylistMenuAnchor(null);
+    };
+
+    const handleCloseMenu = () => closeMenus();
+
+    const handleOpenPlaylistMenu = (event) => {
+        if (!canAdd || playlists.length === 0) return;
+        setPlaylistMenuAnchor(event.currentTarget);
+    };
+
+    const handleClosePlaylistMenu = () => setPlaylistMenuAnchor(null);
 
     const handleSelectPlaylist = (playlist) => {
         if (!playlist) return;
         onAdd(playlist);
-        handleCloseMenu();
+        closeMenus();
     };
 
     const playlistsAvailable = playlists.length > 0;
+
+    const handleEdit = () => {
+        if (!canEdit || typeof onEdit !== 'function') return;
+        onEdit();
+        closeMenus();
+    };
+
+    const handleRemove = () => {
+        if (!canRemove || typeof onRemove !== 'function') return;
+        onRemove();
+        closeMenus();
+    };
 
     return (
         <Paper
@@ -75,15 +111,15 @@ const SongCatalogCard = ({ song, playlists = [], onAdd, canAdd, listeners = 0, p
 
             <Tooltip
                 title={
-                    disabled
-                        ? 'Sign in and open a playlist to add songs'
-                        : 'Add this song to one of your playlists'
+                    menuDisabled
+                        ? 'Sign in to manage catalog songs'
+                        : 'More actions'
                 }
             >
                 <span>
                     <IconButton
                         onClick={handleOpenMenu}
-                        disabled={disabled}
+                        disabled={menuDisabled}
                         sx={{ bgcolor: '#f3e5f5' }}
                     >
                         <MoreVertIcon />
@@ -91,6 +127,27 @@ const SongCatalogCard = ({ song, playlists = [], onAdd, canAdd, listeners = 0, p
                 </span>
             </Tooltip>
             <Menu anchorEl={anchorEl} open={Boolean(anchorEl)} onClose={handleCloseMenu}>
+                <MenuItem
+                    disabled={!canAdd || !playlistsAvailable}
+                    onMouseEnter={handleOpenPlaylistMenu}
+                    onClick={handleOpenPlaylistMenu}
+                >
+                    Add to Playlist
+                </MenuItem>
+                <MenuItem disabled={!canEdit} onClick={handleEdit} sx={{ color: '#5e35b1' }}>
+                    Edit Song
+                </MenuItem>
+                <MenuItem disabled={!canRemove} onClick={handleRemove} sx={{ color: '#c62828' }}>
+                    Remove from Catalog
+                </MenuItem>
+            </Menu>
+            <Menu
+                anchorEl={playlistMenuAnchor}
+                open={Boolean(playlistMenuAnchor)}
+                onClose={handleClosePlaylistMenu}
+                anchorOrigin={{ horizontal: 'right', vertical: 'top' }}
+                transformOrigin={{ horizontal: 'left', vertical: 'top' }}
+            >
                 {playlistsAvailable ? (
                     playlists.map((playlist) => (
                         <MenuItem key={playlist._id} onClick={() => handleSelectPlaylist(playlist)}>

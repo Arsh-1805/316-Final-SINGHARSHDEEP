@@ -14,38 +14,47 @@ import FormControl from '@mui/material/FormControl';
 import InputLabel from '@mui/material/InputLabel';
 import Select from '@mui/material/Select';
 import MenuItem from '@mui/material/MenuItem';
+import Dialog from '@mui/material/Dialog';
+import DialogTitle from '@mui/material/DialogTitle';
+import DialogContent from '@mui/material/DialogContent';
+import DialogActions from '@mui/material/DialogActions';
 
 import { GlobalStoreContext } from '../store';
 import AuthContext from '../auth';
 import SongCatalogCard from './SongCatalogCard';
 
-const useSongCatalogEntries = (pairs) =>
+const useSongCatalogEntries = (pairs, userEmail) =>
     useMemo(() => {
         const byKey = new Map();
         pairs.forEach((pair) => {
             const playlistListeners = pair.listenerCount || 0;
             const playlistId = pair._id;
+            const isOwner = userEmail && pair.ownerEmail === userEmail;
             (pair.songs || []).forEach((song) => {
                 const key = `${song.title || ''}||${song.artist || ''}||${song.year || ''}||${song.youTubeId || ''}`;
                 if (!byKey.has(key)) {
                     byKey.set(key, {
                         song,
                         listeners: playlistListeners,
-                        playlistIds: new Set([playlistId])
+                        playlistIds: new Set([playlistId]),
+                        ownerPlaylistIds: isOwner ? new Set([playlistId]) : new Set()
                     });
                 } else {
                     const entry = byKey.get(key);
                     entry.listeners += playlistListeners;
                     entry.playlistIds.add(playlistId);
+                    if (isOwner) entry.ownerPlaylistIds.add(playlistId);
                 }
             });
         });
         return Array.from(byKey.values()).map((entry) => ({
             song: entry.song,
             listeners: entry.listeners,
-            playlistCount: entry.playlistIds.size
+            playlistCount: entry.playlistIds.size,
+            playlistIds: Array.from(entry.playlistIds),
+            ownerPlaylistIds: Array.from(entry.ownerPlaylistIds)
         }));
-    }, [pairs]);
+    }, [pairs, userEmail]);
 
 const SongsScreen = () => {
     const { store } = useContext(GlobalStoreContext);
@@ -56,6 +65,8 @@ const SongsScreen = () => {
     const [yearFilter, setYearFilter] = useState('');
     const [snackbarState, setSnackbarState] = useState({ open: false, message: '', severity: 'success' });
     const [sortOption, setSortOption] = useState('listenersHigh');
+    const [editDialogState, setEditDialogState] = useState({ open: false, entry: null, form: { title: '', artist: '', year: '', youTubeId: '' } });
+    const [removeDialogState, setRemoveDialogState] = useState({ open: false, entry: null });
 
     useEffect(() => {
         if (!store.idNamePairs.length) {
@@ -63,7 +74,8 @@ const SongsScreen = () => {
         }
     }, [store.idNamePairs.length]);
 
-    const songEntries = useSongCatalogEntries(store.idNamePairs);
+    const userEmail = auth.user?.email || null;
+    const songEntries = useSongCatalogEntries(store.idNamePairs, userEmail);
 
     const sortComparators = {
         listenersHigh: (a, b) => (b.listeners || 0) - (a.listeners || 0),
@@ -120,6 +132,9 @@ const SongsScreen = () => {
 
     const canAddSongs = auth.loggedIn && playlistOptions.length > 0;
 
+    const pushSnackbar = (message, severity = 'success') =>
+        setSnackbarState({ open: true, message, severity });
+
     const handleSongAdd = async (song, playlist) => {
         if (!canAddSongs) return;
         const result = await store.addSongToPlaylist(playlist._id, song);
@@ -130,6 +145,64 @@ const SongsScreen = () => {
                 : 'Could not add song. Please try again.',
             severity: result?.success ? 'success' : 'error'
         });
+    };
+
+    const handleEditSong = (entry) => {
+        setEditDialogState({
+            open: true,
+            entry,
+            form: {
+                title: entry.song.title || '',
+                artist: entry.song.artist || '',
+                year: entry.song.year || '',
+                youTubeId: entry.song.youTubeId || ''
+            }
+        });
+    };
+
+    const handleRemoveSong = (entry) => {
+        setRemoveDialogState({ open: true, entry });
+    };
+
+    const closeEditDialog = () =>
+        setEditDialogState({ open: false, entry: null, form: { title: '', artist: '', year: '', youTubeId: '' } });
+
+    const closeRemoveDialog = () => setRemoveDialogState({ open: false, entry: null });
+
+    const handleEditFieldChange = (field, value) =>
+        setEditDialogState((prev) => ({ ...prev, form: { ...prev.form, [field]: value } }));
+
+    const submitSongEdit = async () => {
+        if (!editDialogState.entry) return;
+        const result = await store.updateSongInPlaylists(
+            editDialogState.entry.ownerPlaylistIds,
+            editDialogState.entry.song,
+            editDialogState.form
+        );
+        if (result?.success) {
+            pushSnackbar(
+                `Updated "${editDialogState.form.title}" in ${result.updatedCount} playlist${result.updatedCount === 1 ? '' : 's'}.`
+            );
+        } else {
+            pushSnackbar(result?.error || 'Could not update song.', 'error');
+        }
+        closeEditDialog();
+    };
+
+    const confirmSongRemoval = async () => {
+        if (!removeDialogState.entry) return;
+        const result = await store.removeSongFromPlaylists(
+            removeDialogState.entry.ownerPlaylistIds,
+            removeDialogState.entry.song
+        );
+        if (result?.success) {
+            pushSnackbar(
+                `Removed "${removeDialogState.entry.song.title}" from ${result.updatedCount} playlist${result.updatedCount === 1 ? '' : 's'}.`
+            );
+        } else {
+            pushSnackbar(result?.error || 'Could not remove song.', 'error');
+        }
+        closeRemoveDialog();
     };
 
     const clearFilters = () => {
@@ -281,7 +354,10 @@ const SongsScreen = () => {
                                 No songs match your filters. Try adjusting your search.
                             </Typography>
                         ) : (
-                            filteredSongs.map(({ song, listeners, playlistCount }, index) => (
+                            filteredSongs.map((entry, index) => {
+                                const { song, listeners, playlistCount, ownerPlaylistIds } = entry;
+                                const canEditEntry = auth.loggedIn && ownerPlaylistIds.length > 0;
+                                return (
                                 <SongCatalogCard
                                     key={`${song.title}-${song.artist}-${index}`}
                                     song={song}
@@ -290,8 +366,13 @@ const SongsScreen = () => {
                                     playlists={playlistOptions}
                                     onAdd={(playlist) => handleSongAdd(song, playlist)}
                                     canAdd={canAddSongs}
+                                    canEdit={canEditEntry}
+                                    canRemove={canEditEntry}
+                                    onEdit={canEditEntry ? () => handleEditSong(entry) : null}
+                                    onRemove={canEditEntry ? () => handleRemoveSong(entry) : null}
                                 />
-                            ))
+                                );
+                            })
                         )}
                     </Box>
                 </Box>
@@ -311,6 +392,51 @@ const SongsScreen = () => {
                     {snackbarState.message}
                 </Alert>
             </Snackbar>
+
+            <Dialog open={editDialogState.open} onClose={closeEditDialog} maxWidth="sm" fullWidth>
+                <DialogTitle>Edit Song</DialogTitle>
+                <DialogContent sx={{ display: 'flex', flexDirection: 'column', gap: 2, mt: 1 }}>
+                    <TextField
+                        label="Title"
+                        value={editDialogState.form.title}
+                        onChange={(e) => handleEditFieldChange('title', e.target.value)}
+                    />
+                    <TextField
+                        label="Artist"
+                        value={editDialogState.form.artist}
+                        onChange={(e) => handleEditFieldChange('artist', e.target.value)}
+                    />
+                    <TextField
+                        label="Year"
+                        value={editDialogState.form.year}
+                        onChange={(e) => handleEditFieldChange('year', e.target.value)}
+                    />
+                    <TextField
+                        label="YouTube ID"
+                        value={editDialogState.form.youTubeId}
+                        onChange={(e) => handleEditFieldChange('youTubeId', e.target.value)}
+                    />
+                </DialogContent>
+                <DialogActions>
+                    <Button onClick={closeEditDialog}>Cancel</Button>
+                    <Button variant="contained" onClick={submitSongEdit}>Save</Button>
+                </DialogActions>
+            </Dialog>
+
+            <Dialog open={removeDialogState.open} onClose={closeRemoveDialog}>
+                <DialogTitle>Remove Song from Catalog</DialogTitle>
+                <DialogContent>
+                    <Typography>
+                        This will remove "{removeDialogState.entry?.song.title}" from all of your playlists that contain it.
+                    </Typography>
+                </DialogContent>
+                <DialogActions>
+                    <Button onClick={closeRemoveDialog}>Cancel</Button>
+                    <Button color="error" variant="contained" onClick={confirmSongRemoval}>
+                        Remove
+                    </Button>
+                </DialogActions>
+            </Dialog>
         </Box>
     );
 };
