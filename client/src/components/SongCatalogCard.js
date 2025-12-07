@@ -10,7 +10,7 @@ import Tooltip from '@mui/material/Tooltip';
 import MoreVertIcon from '@mui/icons-material/MoreVert';
 import OpenInNewIcon from '@mui/icons-material/OpenInNew';
 
-const SongCatalogCard = ({ song, playlists = [], onAdd, canAdd }) => {
+const SongCatalogCard = ({ song, playlists = [], onAdd, canAdd, listeners = 0, playlistCount = 0 }) => {
     const [anchorEl, setAnchorEl] = useState(null);
     const disabled = !canAdd;
 
@@ -49,6 +49,14 @@ const SongCatalogCard = ({ song, playlists = [], onAdd, canAdd }) => {
                 <Typography variant="body2" color="text.secondary">
                     {song.artist}
                 </Typography>
+                <Box sx={{ display: 'flex', gap: 2, mt: 1, flexWrap: 'wrap' }}>
+                    <Typography variant="body2" sx={{ fontWeight: 'bold', color: '#5e35b1' }}>
+                        Listens: {Number(listeners || 0).toLocaleString()}
+                    </Typography>
+                    <Typography variant="body2" color="text.secondary">
+                        Playlists: {playlistCount}
+                    </Typography>
+                </Box>
                 <Box sx={{ display: 'flex', alignItems: 'center', gap: 1, mt: 1 }}>
                     {song.year && <Chip size="small" label={song.year} />}
                     {song.youTubeId && (

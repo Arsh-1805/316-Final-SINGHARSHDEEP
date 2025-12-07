@@ -10,23 +10,41 @@ import SearchIcon from '@mui/icons-material/Search';
 import Divider from '@mui/material/Divider';
 import Snackbar from '@mui/material/Snackbar';
 import Alert from '@mui/material/Alert';
+import FormControl from '@mui/material/FormControl';
+import InputLabel from '@mui/material/InputLabel';
+import Select from '@mui/material/Select';
+import MenuItem from '@mui/material/MenuItem';
 
 import { GlobalStoreContext } from '../store';
 import AuthContext from '../auth';
 import SongCatalogCard from './SongCatalogCard';
 
-const useUniqueSongList = (pairs) =>
+const useSongCatalogEntries = (pairs) =>
     useMemo(() => {
         const byKey = new Map();
         pairs.forEach((pair) => {
+            const playlistListeners = pair.listenerCount || 0;
+            const playlistId = pair._id;
             (pair.songs || []).forEach((song) => {
                 const key = `${song.title || ''}||${song.artist || ''}||${song.year || ''}||${song.youTubeId || ''}`;
                 if (!byKey.has(key)) {
-                    byKey.set(key, song);
+                    byKey.set(key, {
+                        song,
+                        listeners: playlistListeners,
+                        playlistIds: new Set([playlistId])
+                    });
+                } else {
+                    const entry = byKey.get(key);
+                    entry.listeners += playlistListeners;
+                    entry.playlistIds.add(playlistId);
                 }
             });
         });
-        return Array.from(byKey.values());
+        return Array.from(byKey.values()).map((entry) => ({
+            song: entry.song,
+            listeners: entry.listeners,
+            playlistCount: entry.playlistIds.size
+        }));
     }, [pairs]);
 
 const SongsScreen = () => {
@@ -37,6 +55,7 @@ const SongsScreen = () => {
     const [artistFilter, setArtistFilter] = useState('');
     const [yearFilter, setYearFilter] = useState('');
     const [snackbarState, setSnackbarState] = useState({ open: false, message: '', severity: 'success' });
+    const [sortOption, setSortOption] = useState('listenersHigh');
 
     useEffect(() => {
         if (!store.idNamePairs.length) {
@@ -44,15 +63,33 @@ const SongsScreen = () => {
         }
     }, [store.idNamePairs.length]);
 
-    const allSongs = useUniqueSongList(store.idNamePairs);
+    const songEntries = useSongCatalogEntries(store.idNamePairs);
+
+    const sortComparators = {
+        listenersHigh: (a, b) => (b.listeners || 0) - (a.listeners || 0),
+        listenersLow: (a, b) => (a.listeners || 0) - (b.listeners || 0),
+        titleAZ: (a, b) => (a.song.title || '').localeCompare(b.song.title || ''),
+        titleZA: (a, b) => (b.song.title || '').localeCompare(a.song.title || ''),
+        artistAZ: (a, b) => (a.song.artist || '').localeCompare(b.song.artist || ''),
+        artistZA: (a, b) => (b.song.artist || '').localeCompare(a.song.artist || ''),
+    };
+
+    const sortOptionsList = [
+        { value: 'listenersHigh', label: 'Listeners (Hi-Lo)' },
+        { value: 'listenersLow', label: 'Listeners (Lo-Hi)' },
+        { value: 'titleAZ', label: 'Title (A-Z)' },
+        { value: 'titleZA', label: 'Title (Z-A)' },
+        { value: 'artistAZ', label: 'Artist (A-Z)' },
+        { value: 'artistZA', label: 'Artist (Z-A)' },
+    ];
 
     const filteredSongs = useMemo(() => {
         const title = titleFilter.trim().toLowerCase();
         const artist = artistFilter.trim().toLowerCase();
         const year = yearFilter.trim().toLowerCase();
 
-        return allSongs
-            .filter((song) => {
+        return songEntries
+            .filter(({ song }) => {
                 const songTitle = (song.title || '').toLowerCase();
                 const songArtist = (song.artist || '').toLowerCase();
                 const songYear = (song.year || '').toString().toLowerCase();
@@ -62,8 +99,8 @@ const SongsScreen = () => {
                     (!year || songYear.includes(year))
                 );
             })
-            .sort((a, b) => (a.title || '').localeCompare(b.title || ''));
-    }, [allSongs, titleFilter, artistFilter, yearFilter]);
+            .sort(sortComparators[sortOption] || sortComparators.listenersHigh);
+    }, [songEntries, titleFilter, artistFilter, yearFilter, sortOption]);
 
     const playlistOptions = useMemo(() => {
         if (!auth.loggedIn || !auth.user) return [];
@@ -211,7 +248,26 @@ const SongsScreen = () => {
                             gap: 1
                         }}
                     >
-                        <Typography variant="h6">Results</Typography>
+                        <Box sx={{ display: 'flex', alignItems: 'center', gap: 1, flexWrap: 'wrap' }}>
+                            <Typography variant="subtitle1" sx={{ fontWeight: 'bold' }}>
+                                Sort:
+                            </Typography>
+                            <FormControl size="small" sx={{ minWidth: 170 }}>
+                                <InputLabel id="songs-sort-label">Sort by</InputLabel>
+                                <Select
+                                    labelId="songs-sort-label"
+                                    label="Sort by"
+                                    value={sortOption}
+                                    onChange={(event) => setSortOption(event.target.value)}
+                                >
+                                    {sortOptionsList.map((option) => (
+                                        <MenuItem key={option.value} value={option.value}>
+                                            {option.label}
+                                        </MenuItem>
+                                    ))}
+                                </Select>
+                            </FormControl>
+                        </Box>
                         <Typography variant="subtitle1" sx={{ fontWeight: 'bold' }}>
                             {filteredSongs.length} {filteredSongs.length === 1 ? 'Song' : 'Songs'}
                         </Typography>
@@ -225,10 +281,12 @@ const SongsScreen = () => {
                                 No songs match your filters. Try adjusting your search.
                             </Typography>
                         ) : (
-                            filteredSongs.map((song, index) => (
+                            filteredSongs.map(({ song, listeners, playlistCount }, index) => (
                                 <SongCatalogCard
                                     key={`${song.title}-${song.artist}-${index}`}
                                     song={song}
+                                    listeners={listeners}
+                                    playlistCount={playlistCount}
                                     playlists={playlistOptions}
                                     onAdd={(playlist) => handleSongAdd(song, playlist)}
                                     canAdd={canAddSongs}
