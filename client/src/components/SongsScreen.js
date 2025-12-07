@@ -73,6 +73,7 @@ const SongsScreen = () => {
     const [editDialogState, setEditDialogState] = useState({ open: false, entry: null, form: { title: '', artist: '', year: '', youTubeId: '' } });
     const [removeDialogState, setRemoveDialogState] = useState({ open: false, entry: null });
     const [newSongDialog, setNewSongDialog] = useState({ open: false, form: { title: '', artist: '', year: '', youTubeId: '' }, playlistId: '' });
+    const [selectedSongKey, setSelectedSongKey] = useState(null);
 
     useEffect(() => {
         if (!store.idNamePairs.length) {
@@ -146,9 +147,28 @@ const SongsScreen = () => {
 
     const canAddSongs = auth.loggedIn && playlistOptions.length > 0;
 
-    const catalogKeySet = useMemo(() => new Set(
-        songEntries.map((entry) => buildSongCatalogKey(entry.song))
-    ), [songEntries]);
+    const catalogKeySet = useMemo(
+        () => new Set(songEntries.map((entry) => buildSongCatalogKey(entry.song))),
+        [songEntries]
+    );
+
+    const selectedEntry = useMemo(() => {
+        if (!selectedSongKey) return null;
+        return songEntries.find((entry) => buildSongCatalogKey(entry.song) === selectedSongKey) || null;
+    }, [songEntries, selectedSongKey]);
+
+    useEffect(() => {
+        if (!filteredSongs.length) {
+            setSelectedSongKey(null);
+            return;
+        }
+        const stillVisible = filteredSongs.some(
+            (entry) => buildSongCatalogKey(entry.song) === selectedSongKey
+        );
+        if (!stillVisible) {
+            setSelectedSongKey(buildSongCatalogKey(filteredSongs[0].song));
+        }
+    }, [filteredSongs, selectedSongKey]);
 
     const pushSnackbar = (message, severity = 'success') =>
         setSnackbarState({ open: true, message, severity });
@@ -373,6 +393,55 @@ const SongsScreen = () => {
                             Open or create a playlist first so it appears here for quick adding.
                         </Typography>
                     )}
+
+                    <Divider sx={{ my: 2 }} />
+                    <Box
+                        sx={{
+                            minHeight: 220,
+                            borderRadius: 2,
+                            bgcolor: '#f3e5f5',
+                            p: 2,
+                            display: 'flex',
+                            flexDirection: 'column',
+                            gap: 1
+                        }}
+                    >
+                        <Typography variant="subtitle1" sx={{ fontWeight: 'bold', color: '#6a1b9a' }}>
+                            Preview
+                        </Typography>
+                        {selectedEntry && selectedEntry.song.youTubeId ? (
+                            <Box
+                                sx={{
+                                    position: 'relative',
+                                    paddingBottom: '56.25%',
+                                    height: 0,
+                                    width: '100%',
+                                    borderRadius: 2,
+                                    overflow: 'hidden',
+                                    boxShadow: 1
+                                }}
+                            >
+                                <iframe
+                                    title={`${selectedEntry.song.title} preview`}
+                                    src={`https://www.youtube.com/embed/${selectedEntry.song.youTubeId}`}
+                                    frameBorder="0"
+                                    allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
+                                    allowFullScreen
+                                    style={{
+                                        position: 'absolute',
+                                        top: 0,
+                                        left: 0,
+                                        width: '100%',
+                                        height: '100%'
+                                    }}
+                                />
+                            </Box>
+                        ) : (
+                            <Typography variant="body2" color="text.secondary">
+                                Select a song with a YouTube link to preview it here.
+                            </Typography>
+                        )}
+                    </Box>
                 </Box>
 
                 <Box
@@ -433,6 +502,7 @@ const SongsScreen = () => {
                             filteredSongs.map((entry, index) => {
                                 const { song, listeners, playlistCount, ownerPlaylistIds } = entry;
                                 const canEditEntry = auth.loggedIn && ownerPlaylistIds.length > 0;
+                                const entryKey = buildSongCatalogKey(entry.song);
                                 return (
                                 <SongCatalogCard
                                     key={`${song.title}-${song.artist}-${index}`}
@@ -444,6 +514,8 @@ const SongsScreen = () => {
                                     canAdd={canAddSongs}
                                     canEdit={canEditEntry}
                                     canRemove={canEditEntry}
+                                    isSelected={entryKey === selectedSongKey}
+                                    onSelect={() => setSelectedSongKey(entryKey)}
                                     onEdit={canEditEntry ? () => handleEditSong(entry) : null}
                                     onRemove={canEditEntry ? () => handleRemoveSong(entry) : null}
                                 />

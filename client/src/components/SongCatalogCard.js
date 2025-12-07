@@ -21,6 +21,8 @@ const SongCatalogCard = ({
     canRemove = false,
     onEdit,
     onRemove,
+    onSelect,
+    isSelected = false,
 }) => {
     const [anchorEl, setAnchorEl] = useState(null);
     const [playlistMenuAnchor, setPlaylistMenuAnchor] = useState(null);
@@ -76,7 +78,11 @@ const SongCatalogCard = ({
                 justifyContent: 'space-between',
                 alignItems: 'center',
                 gap: 2,
+                border: isSelected ? '2px solid #ff80ab' : '2px solid transparent',
+                transition: 'border-color 0.2s ease',
+                cursor: onSelect ? 'pointer' : 'default',
             }}
+            onClick={onSelect}
         >
             <Box sx={{ flexGrow: 1 }}>
                 <Typography variant="h6" sx={{ fontWeight: 'bold' }}>
@@ -118,7 +124,10 @@ const SongCatalogCard = ({
             >
                 <span>
                     <IconButton
-                        onClick={handleOpenMenu}
+                        onClick={(event) => {
+                            event.stopPropagation();
+                            handleOpenMenu(event);
+                        }}
                         disabled={menuDisabled}
                         sx={{ bgcolor: '#f3e5f5' }}
                     >
