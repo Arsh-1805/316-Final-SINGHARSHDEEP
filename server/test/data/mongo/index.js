@@ -48,7 +48,7 @@ async function resetMongo() {
                 S("Passionfruit", "Drake", 2017, "COz9lDCFHjw"),
                 S("After Hours", "The Weeknd", 2020, "ygTZZpVkmKg"),
                 S("Crew Love", "Drake ft. The Weeknd", 2011, "v8waU_Msi9U"),
-                S("Get Along", "Drake", 2013, "ZGHp_tAPzTg"),
+                S("Get Along Better", "Drake ft. Ty Dolla $ign", 2021, "R-uMLq0lkPw"),
                 S("Pink + White", "Frank Ocean", 2016, "O8cDfnQDikQ"),
                 S("Location", "Khalid", 2017, "by3yRdlQvzs"),
                 S("For Tonight", "Giveon", 2021, "bDqu1Z1xqs8"),
@@ -56,15 +56,17 @@ async function resetMongo() {
                 S("From Time", "Drake ft. Jhene Aiko", 2013, "6PyP8p21xuM"),
                 S("Street Lights", "Kanye West", 2008, "6OdO9a4D0xY"),
                 S("Lost", "Frank Ocean", 2012, "tfj0A9bJSgI"),
-                S("Her Feelings", "NAV", 2017, "YqFPP3HcbsE"),
+                S("Fell in Love", "NAV", 2016, "W9ObD5d9dKw"),
                 S("Faith", "The Weeknd", 2020, "UtaYneynQ14"),
-                S("Care Package", "Drake", 2019, "6c6zt6hGZFc"),
+                S("Club Paradise", "Drake", 2011, "EfGOqrXcm_Y"),
                 S("Best Part", "Daniel Caesar ft. H.E.R.", 2017, "vBy7FaapGRo"),
                 S("Die For You", "The Weeknd", 2016, "QLCpqdqeoII"),
-                S("Back To You", "NAV", 2020, "AXeZz9FbTgU"),
+                S("Back 2 Buisness", "NAV", 2020, "wrc2TkmzZdU"),
                 S("Too Deep to Turn Back", "Daniel Caesar", 2023, "L7tYcDqTMMg"),
                 S("Faithful", "Drake ft. Pimp C & dvsn", 2016, "5uDPu3qgJ6o"),
-                S("Lost Ones", "J. Cole", 2011, "ngzC_8zqInk")
+                S("Lost Ones", "J. Cole", 2011, "ngzC_8zqInk"),
+                S("Heartbreak Anniversary", "Giveon", 2020, "MxOZPj8V1Zo"),
+                S("Pink + White", "Frank Ocean", 2016, "O8cDfnQDikQ")
                 ]
         },
         {
@@ -77,7 +79,7 @@ async function resetMongo() {
                 S("Get You", "Daniel Caesar ft. Kali Uchis", 2016, "upm1P6nPWy4"),
                 S("Lost In Japan", "Shawn Mendes", 2018, "xD7x7Gx0y3I"),
                 S("Come and See Me", "PARTYNEXTDOOR ft. Drake", 2016, "1K9Oa4fFZLQ"),
-                S("Lofty Goals", "NAV", 2017, "ahhD-VrWnac"),
+                S("Some Way", "NAV", 2017, "nnJ_h2hRpoI"),
                 S("Often", "The Weeknd", 2014, "JPIhUaONiLU"),
                 S("Gravity", "Brent Faiyaz ft. Tyler, The Creator", 2021, "Pp-pElPOeyA"),
                 S("Just Friends", "Musiq Soulchild", 2000, "iWJgJ3j58_I"),
@@ -85,11 +87,11 @@ async function resetMongo() {
                 S("Hold On, We're Going Home", "Drake ft. Majid Jordan", 2013, "GxgqpCdOKak"),
                 S("Get You Good", "Roy Woods", 2015, "1CTy-Fcb5bg"),
                 S("Heartbreak Anniversary", "Giveon", 2020, "MxOZPj8V1Zo"),
-                S("Truly Yours", "J. Cole", 2013, "amOYeQw4F_M"),
+                S("Love Yourz", "J. Cole", 2014, "6tjlU4w4fSo"),
                 S("Find Your Love", "Drake", 2010, "pZ12_E5R3qc"),
                 S("Lost Without U", "Robin Thicke", 2006, "tR-Y4xkJhVc"),
                 S("Confident", "Justin Bieber ft. Chance The Rapper", 2013, "50VNCymT-Cs"),
-                S("Let Me Go", "Daniel Caesar ft. Ty Dolla $ign", 2023, "DNzVRN3Hj7o"),
+                S("Let Me Go", "Daniel Caesar", 2023, "JvrVT2VGcvg"),
                 S("Snooze", "SZA", 2022, "kPBTXk1HNXs"),
                 S("Earned It", "The Weeknd", 2015, "waU75jdUnYw")
                 ]

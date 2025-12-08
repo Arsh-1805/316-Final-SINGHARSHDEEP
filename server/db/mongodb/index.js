@@ -5,11 +5,16 @@ const Playlist = require("../../models/playlist-model");
 
 class MongoDatabaseManager extends DatabaseManager {
   async connect() {
-    const uri = process.env.DB_CONNECT;
-    if (!uri) throw new Error("DB_CONNECT missing in .env");
+    const isTest = process.env.NODE_ENV === "test";
+    const uri = isTest ? process.env.DB_CONNECT_TEST : process.env.DB_CONNECT;
+    if (!uri) {
+      throw new Error(
+        isTest ? "DB_CONNECT_TEST missing in .env" : "DB_CONNECT missing in .env"
+      );
+    }
 
     await mongoose.connect(uri, { useNewUrlParser: true, useUnifiedTopology: true });
-    console.log("[DB] Connected to MongoDB");
+    console.log("[DB] Connected to MongoDB", isTest ? "(test)" : "(dev)");
   }
 
   async disconnect() {
