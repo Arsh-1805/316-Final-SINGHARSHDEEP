@@ -69,16 +69,30 @@ export default function RegisterScreen() {
     const file = e.target.files[0];
     if (!file) return;
 
-    if (!file.type.startsWith("image/")) {
-      setAvatarError("Please select an image file.");
+    if (file.type !== "image/png") {
+      setAvatarError("Avatar must be a PNG file.");
       setAvatarData("");
       return;
     }
 
     const reader = new FileReader();
     reader.onloadend = () => {
-      setAvatarError("");
-      setAvatarData(reader.result); 
+      const dataUrl = reader.result;
+      const img = new Image();
+      img.onload = () => {
+        if (img.width !== 250 || img.height !== 250) {
+          setAvatarError("Avatar must be exactly 250 x 250 pixels.");
+          setAvatarData("");
+        } else {
+          setAvatarError("");
+          setAvatarData(dataUrl);
+        }
+      };
+      img.onerror = () => {
+        setAvatarError("Unable to read image. Please try another file.");
+        setAvatarData("");
+      };
+      img.src = dataUrl;
     };
     reader.readAsDataURL(file);
   };
@@ -212,14 +226,14 @@ export default function RegisterScreen() {
 
                 <Grid item xs={12}>
                   <Typography variant="body2" sx={{ mb: 1 }}>
-                    Avatar Image (128 × 128 pixels)
+                    Avatar Image (250 × 250 PNG)
                   </Typography>
                   <Button variant="contained" component="label">
                     CHOOSE AVATAR
                     <input
                       type="file"
                       hidden
-                      accept="image/*"
+                      accept="image/png"
                       onChange={handleAvatarChange}
                     />
                   </Button>

@@ -1,4 +1,4 @@
-import { useContext, useEffect, useState } from "react";
+import { useContext, useEffect, useRef, useState } from "react";
 import { useHistory } from "react-router-dom";
 import AuthContext from "../auth";
 
@@ -23,6 +23,7 @@ export default function EditAccountScreen() {
   const [passwordVerify, setPasswordVerify] = useState("");
   const [avatarData, setAvatarData] = useState("");
   const [avatarError, setAvatarError] = useState("");
+  const avatarErrorTimerRef = useRef(null);
 
   const [touched, setTouched] = useState({
     email: false,
@@ -61,6 +62,14 @@ export default function EditAccountScreen() {
       ? "Passwords do not match."
       : "";
 
+  useEffect(() => {
+    return () => {
+      if (avatarErrorTimerRef.current) {
+        clearTimeout(avatarErrorTimerRef.current);
+      }
+    };
+  }, []);
+
   const isFormValid =
     email &&
     userName.trim().length > 0 &&
@@ -68,7 +77,18 @@ export default function EditAccountScreen() {
     !userNameError &&
     !passwordError &&
     !passwordVerifyError &&
-    !avatarError;
+    avatarData !== null;
+
+  const showAvatarError = (message) => {
+    if (avatarErrorTimerRef.current) {
+      clearTimeout(avatarErrorTimerRef.current);
+    }
+    setAvatarError(message);
+    avatarErrorTimerRef.current = setTimeout(() => {
+      setAvatarError("");
+      avatarErrorTimerRef.current = null;
+    }, 4000);
+  };
 
   const markTouched = (field) => () =>
     setTouched((prev) => ({ ...prev, [field]: true }));
@@ -77,16 +97,31 @@ export default function EditAccountScreen() {
     const file = e.target.files[0];
     if (!file) return;
 
-    if (!file.type.startsWith("image/")) {
-      setAvatarError("Please select an image file.");
-      setAvatarData("");
+    if (file.type !== "image/png") {
+      showAvatarError("Avatar must be a 250 x 250 PNG file.");
       return;
     }
 
     const reader = new FileReader();
     reader.onloadend = () => {
-      setAvatarError("");
-      setAvatarData(reader.result); 
+      const dataUrl = reader.result;
+      const img = new Image();
+      img.onload = () => {
+        if (img.width !== 250 || img.height !== 250) {
+          showAvatarError("Avatar must be exactly 250 x 250 pixels.");
+        } else {
+          if (avatarErrorTimerRef.current) {
+            clearTimeout(avatarErrorTimerRef.current);
+            avatarErrorTimerRef.current = null;
+          }
+          setAvatarError("");
+          setAvatarData(dataUrl);
+        }
+      };
+      img.onerror = () => {
+        showAvatarError("Unable to read image. Please try another file.");
+      };
+      img.src = dataUrl;
     };
     reader.readAsDataURL(file);
   };
@@ -226,14 +261,14 @@ export default function EditAccountScreen() {
 
                 <Grid item xs={12}>
                   <Typography variant="body2" sx={{ mb: 1 }}>
-                    Avatar Image (128 × 128 pixels)
+                    Avatar Image (250 × 250 PNG)
                   </Typography>
                   <Button variant="contained" component="label">
                     CHOOSE AVATAR
                     <input
                       type="file"
                       hidden
-                      accept="image/*"
+                      accept="image/png"
                       onChange={handleAvatarChange}
                     />
                   </Button>
