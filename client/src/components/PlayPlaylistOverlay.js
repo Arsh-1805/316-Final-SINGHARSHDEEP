@@ -178,7 +178,7 @@ const PlayPlaylistOverlay = () => {
                                     color: '#4a148c'
                                 }}
                             >
-                                {index + 1}. {song.title} ({song.year})
+                                {index + 1}. {song.title} — {song.artist} ({song.year})
                             </Button>
                         ))}
                     </Box>

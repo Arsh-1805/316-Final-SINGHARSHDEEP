@@ -1,9 +1,12 @@
 {
     "users": [
         {
-            "firstName": "Joe",
-            "lastName": "Shmo",
+            "_id": "6933ae9cce24326a9e25fb3f",
             "email": "joe@shmo.com",
+            "userName": "Joe",
+            "firstName": "",
+            "lastName": "",
+            "avatar": "",
             "passwordHash": "$2a$10$dPEwsAVi1ojv2RfxxTpZjuKSAbep7zEKb5myegm.ATbQ4sJk4agGu",
             "playlists": [
                 "68f524b611e0f3901871f164",
@@ -11,214 +14,636 @@
             ]
         },
         {
-            "firstName": "Jane",
-            "lastName": "Doe",
+            "_id": "6933ae9cce24326a9e25fb41",
             "email": "jane@doe.com",
+            "userName": "Jane",
+            "firstName": "",
+            "lastName": "",
+            "avatar": "",
             "passwordHash": "$2a$10$dPEwsAVi1ojv2RfxxTpZjuKSAbep7zEKb5myegm.ATbQ4sJk4agGu",
             "playlists": [
                 "68f526c4ec1ea2ad00a6fae8"
             ]
+        },
+        {
+            "_id": "6933ae9cce24326a9e25fb43",
+            "email": "arsh@doe.com",
+            "userName": "Arsh",
+            "firstName": "",
+            "lastName": "",
+            "avatar": "data:image/png;base64,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",
+            "passwordHash": "$2a$10$X//Tt8cWXWmixlQ0NyGd9.42wLIjdagwuH0xCKELf.ciJlmQsYY.2",
+            "playlists": []
+        },
+        {
+            "_id": "6934a0a265a0a546bb500791",
+            "email": "bob@shmo.com",
+            "userName": "Bobby",
+            "firstName": "",
+            "lastName": "",
+            "avatar": "data:image/jpeg;base64,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",
+            "passwordHash": "$2a$10$xH.B0tddZplRwtSt51cwd.KLjVHFcuTK8sS7tIJoIopUUVW/izYiW",
+            "playlists": []
         }
     ],
     "playlists": [
         {
             "_id": "68f524b611e0f3901871f164",
+            "owner": "6933ae9cce24326a9e25fb3f",
             "ownerEmail": "joe@shmo.com",
+            "ownerName": "",
             "name": "Spacey",
+            "listenerCount": 2,
             "songs": [
                 {
-                    "title": "Blinding Lights",
-                    "artist": "The Weeknd",
-                    "year": 2020,
-                    "youTubeId": "4NRXx6U8ABQ"
+                    "title": "Across the Universe",
+                    "artist": "The Beatles",
+                    "year": 1969,
+                    "youTubeId": "90M60PzmxEE"
                 },
                 {
-                    "title": "drivers license",
-                    "artist": "Olivia Rodrigo",
-                    "year": 2021,
-                    "youTubeId": "ZmDBbnmKpqQ"
+                    "title": "Astronomy Domine",
+                    "artist": "Pink Floyd",
+                    "year": 1967,
+                    "youTubeId": "8UbNbor3OqQ"
                 },
                 {
-                    "title": "Stay",
-                    "artist": "The Kid LAROI & Justin Bieber",
-                    "year": 2021,
-                    "youTubeId": "kTJczUoc26U"
+                    "title": "Black Hole Sun",
+                    "artist": "Soundgarden",
+                    "year": 1994,
+                    "youTubeId": "3mbBbFH9fAg"
                 },
                 {
-                    "title": "Sunflower",
-                    "artist": "Post Malone & Swae Lee",
-                    "year": 2018,
-                    "youTubeId": "ApXoWvfEYVU"
+                    "title": "Brain Damage/Eclipse",
+                    "artist": "Pink Floyd",
+                    "year": 1973,
+                    "youTubeId": "g1OOQP1-wOE"
                 },
                 {
-                    "title": "Levitating",
-                    "artist": "Dua Lipa",
-                    "year": 2020,
-                    "youTubeId": "TUVcZfQe-Kw"
+                    "title": "Fly Me to the Moon",
+                    "artist": "Frank Sinatra",
+                    "year": 1964,
+                    "youTubeId": "ZEcqHA7dbwM"
                 },
                 {
-                    "title": "Shape of You",
-                    "artist": "Ed Sheeran",
-                    "year": 2017,
-                    "youTubeId": "JGwWNGJdvx8"
+                    "title": "In the Meantime",
+                    "artist": "Spacehog",
+                    "year": 1994,
+                    "youTubeId": "PCsGRCf8T9Y"
                 },
                 {
-                    "title": "Watermelon Sugar",
-                    "artist": "Harry Styles",
-                    "year": 2019,
-                    "youTubeId": "E07s5ZYygMg"
+                    "title": "Major Tom",
+                    "artist": "Peter Shilling",
+                    "year": 1982,
+                    "youTubeId": "wO0A0XcWy88"
                 },
                 {
-                    "title": "Memories",
-                    "artist": "Maroon 5",
-                    "year": 2019,
-                    "youTubeId": "SlPhMPnQ58k"
+                    "title": "Man on the Moon",
+                    "artist": "REM",
+                    "year": 1992,
+                    "youTubeId": "dLxpNiF0YKs"
                 },
                 {
-                    "title": "Old Town Road",
-                    "artist": "Lil Nas X",
-                    "year": 2019,
-                    "youTubeId": "r7qovpFAGrQ"
+                    "title": "Rocket Man",
+                    "artist": "Elton John",
+                    "year": 1972,
+                    "youTubeId": "DtVBCG6ThDk"
                 },
                 {
-                    "title": "Believer",
-                    "artist": "Imagine Dragons",
-                    "year": 2017,
-                    "youTubeId": "7wtfhZwyrcc"
+                    "title": "Set the Controls for the Heart of the Sun",
+                    "artist": "Pink Floyd",
+                    "year": 1968,
+                    "youTubeId": "qupVCTn5Dko"
                 },
                 {
-                    "title": "Bad Guy",
-                    "artist": "Billie Eilish",
-                    "year": 2019,
-                    "youTubeId": "DyDfgMOUjCI"
+                    "title": "Space Oddity",
+                    "artist": "David Bowie",
+                    "year": 1969,
+                    "youTubeId": "iYYRH4apXDo"
                 },
                 {
-                    "title": "Happier",
-                    "artist": "Marshmello ft. Bastille",
-                    "year": 2018,
-                    "youTubeId": "m7Bc3pLyij0"
+                    "title": "Space Song",
+                    "artist": "Beach House",
+                    "year": 2015,
+                    "youTubeId": "RBtlPT23PTM"
                 },
                 {
-                    "title": "Anti-Hero",
-                    "artist": "Taylor Swift",
-                    "year": 2022,
-                    "youTubeId": "b1kbLwvqugk"
+                    "title": "Starless",
+                    "artist": "King Crimson",
+                    "year": 1974,
+                    "youTubeId": "OfR6_V91fG8"
                 },
                 {
-                    "title": "Circles",
-                    "artist": "Post Malone",
-                    "year": 2019,
-                    "youTubeId": "wXhTHyIgQ_U"
+                    "title": "Starman",
+                    "artist": "David Bowie",
+                    "year": 1972,
+                    "youTubeId": "t365MuktYQs"
                 },
                 {
-                    "title": "Uptown Funk",
-                    "artist": "Mark Ronson ft. Bruno Mars",
-                    "year": 2014,
-                    "youTubeId": "OPf0YbXqDm0"
+                    "title": "Starship Trooper",
+                    "artist": "Yes",
+                    "year": 1971,
+                    "youTubeId": "xk4U8BembHM"
                 }
             ]
         },
         {
             "_id": "68f526c1ec1ea2ad00a6fae0",
+            "owner": "6933ae9cce24326a9e25fb3f",
             "ownerEmail": "joe@shmo.com",
+            "ownerName": "",
             "name": "Any Colour You Like",
+            "listenerCount": 0,
             "songs": [
                 {
-                    "title": "Take Me To Church",
-                    "artist": "Hozier",
-                    "year": 2013,
-                    "youTubeId": "PVjiKRfKpPI"
+                    "title": "99 Red Balloons",
+                    "artist": "Nena",
+                    "year": 1984,
+                    "youTubeId": "Fpu5a0Bl8eY"
                 },
                 {
-                    "title": "Counting Stars",
-                    "artist": "OneRepublic",
-                    "year": 2013,
-                    "youTubeId": "hT_nvWreIhg"
+                    "title": "Big Blue Sun",
+                    "artist": "Adrian Belew",
+                    "year": 1986,
+                    "youTubeId": "DMkEmW2awQw"
                 },
                 {
-                    "title": "Radioactive",
-                    "artist": "Imagine Dragons",
-                    "year": 2012,
-                    "youTubeId": "ktvTqknDobU"
+                    "title": "Black Dog",
+                    "artist": "Led Zeppelin",
+                    "year": 1971,
+                    "youTubeId": "2KPEHohJMuw"
                 },
                 {
-                    "title": "God's Plan",
-                    "artist": "Drake",
-                    "year": 2018,
-                    "youTubeId": "xpVfcZ0ZcFM"
+                    "title": "Golden Brown",
+                    "artist": "The Stranglers",
+                    "year": 1981,
+                    "youTubeId": "7KIHvuMl4Kk"
                 },
                 {
-                    "title": "Shallow",
-                    "artist": "Lady Gaga & Bradley Cooper",
-                    "year": 2018,
-                    "youTubeId": "bo_efYhYU2A"
+                    "title": "Goodbye Yellow Brick Road",
+                    "artist": "Elton John",
+                    "year": 1973,
+                    "youTubeId": "wy709iNG6i8"
                 },
                 {
-                    "title": "Hello",
-                    "artist": "Adele",
-                    "year": 2015,
-                    "youTubeId": "YQHsXMglC9A"
+                    "title": "Green is the Colour",
+                    "artist": "Pink Floyd",
+                    "year": 1969,
+                    "youTubeId": "4XeWngFZaa8"
                 },
                 {
-                    "title": "Get Lucky",
-                    "artist": "Daft Punk ft. Pharrell Williams",
-                    "year": 2013,
-                    "youTubeId": "5NV6Rdv1a3I"
+                    "title": "In the Court of the Crimson King",
+                    "artist": "King Crimson",
+                    "year": 1969,
+                    "youTubeId": "ukgraQ-xkp4"
                 },
                 {
-                    "title": "Royals",
-                    "artist": "Lorde",
-                    "year": 2013,
-                    "youTubeId": "nlcIKh6sBtc"
+                    "title": "Orange Crush",
+                    "artist": "REM",
+                    "year": 1988,
+                    "youTubeId": "_mSmOcmk7uQ"
                 },
                 {
-                    "title": "Rolling in the Deep",
-                    "artist": "Adele",
-                    "year": 2010,
-                    "youTubeId": "rYEDA3JcQqw"
+                    "title": "Pink Houses",
+                    "artist": "John Mellancamp",
+                    "year": 1983,
+                    "youTubeId": "qOfkpu6749w"
                 },
                 {
-                    "title": "All of Me",
-                    "artist": "John Legend",
-                    "year": 2013,
-                    "youTubeId": "450p7goxZqg"
+                    "title": "Purple Rain",
+                    "artist": "Prince",
+                    "year": 1984,
+                    "youTubeId": "TvnYmWpD_T8"
                 },
                 {
-                    "title": "Viva la Vida",
-                    "artist": "Coldplay",
-                    "year": 2008,
-                    "youTubeId": "dvgZkm1xWPE"
+                    "title": "White Lines",
+                    "artist": "Grandmaster Flash and the Furious Five",
+                    "year": 1983,
+                    "youTubeId": "DwRXI-y6M9o"
                 }
             ]
         },
         {
             "_id": "68f526c4ec1ea2ad00a6fae8",
+            "owner": "6933ae9cce24326a9e25fb41",
             "ownerEmail": "jane@doe.com",
+            "ownerName": "",
             "name": "Don't be Rude",
+            "listenerCount": 1,
             "songs": [
                 {
-                    "title": "Rude",
-                    "artist": "MAGIC!",
-                    "year": 2013,
-                    "youTubeId": "PIh2xe4jnpk"
+                    "title": "A Message to You Rudy",
+                    "artist": "The Specials",
+                    "year": 1979,
+                    "youTubeId": "cntvEDbagAw"
                 },
                 {
-                    "title": "Don't Worry, Be Happy",
-                    "artist": "Bobby McFerrin",
-                    "year": 1988,
-                    "youTubeId": "d-diB65scQU"
+                    "title": "Rudie Can't Fail",
+                    "artist": "The Clash",
+                    "year": 1979,
+                    "youTubeId": "uEK9oK02D1M"
+                }
+            ]
+        },
+        {
+            "_id": "6933ae9cce24326a9e25fafd",
+            "owner": "6933ae9cce24326a9e25fb43",
+            "ownerEmail": "arsh@doe.com",
+            "ownerName": "",
+            "name": "Modern Vibes",
+            "listenerCount": 7,
+            "songs": [
+                {
+                    "title": "Passionfruit",
+                    "artist": "Drake",
+                    "year": "2017",
+                    "youTubeId": "COz9lDCFHjw"
                 },
                 {
-                    "title": "Good Time",
-                    "artist": "Owl City & Carly Rae Jepsen",
-                    "year": 2012,
-                    "youTubeId": "H7HmzwI67ec"
+                    "title": "After Hours",
+                    "artist": "The Weeknd",
+                    "year": "2020",
+                    "youTubeId": "ygTZZpVkmKg"
                 },
                 {
-                    "title": "Happy",
-                    "artist": "Pharrell Williams",
-                    "year": 2013,
-                    "youTubeId": "ZbZSe6N_BXs"
+                    "title": "Crew Love",
+                    "artist": "Drake ft. The Weeknd",
+                    "year": "2011",
+                    "youTubeId": "v8waU_Msi9U"
+                },
+                {
+                    "title": "Get Along Better",
+                    "artist": "Drake ft. Ty Dolla $ign",
+                    "year": "2021",
+                    "youTubeId": "R-uMLq0lkPw"
+                },
+                {
+                    "title": "Pink + White",
+                    "artist": "Frank Ocean",
+                    "year": "2016",
+                    "youTubeId": "O8cDfnQDikQ"
+                },
+                {
+                    "title": "Location",
+                    "artist": "Khalid",
+                    "year": "2017",
+                    "youTubeId": "by3yRdlQvzs"
+                },
+                {
+                    "title": "For Tonight",
+                    "artist": "Giveon",
+                    "year": "2021",
+                    "youTubeId": "bDqu1Z1xqs8"
+                },
+                {
+                    "title": "Outta Time",
+                    "artist": "Bryson Tiller ft. Drake",
+                    "year": "2020",
+                    "youTubeId": "ebkurI0ij7Q"
+                },
+                {
+                    "title": "From Time",
+                    "artist": "Drake ft. Jhene Aiko",
+                    "year": "2013",
+                    "youTubeId": "6PyP8p21xuM"
+                },
+                {
+                    "title": "Street Lights",
+                    "artist": "Kanye West",
+                    "year": "2008",
+                    "youTubeId": "6OdO9a4D0xY"
+                },
+                {
+                    "title": "Lost",
+                    "artist": "Frank Ocean",
+                    "year": "2012",
+                    "youTubeId": "tfj0A9bJSgI"
+                },
+                {
+                    "title": "Fell in Love",
+                    "artist": "NAV",
+                    "year": "2016",
+                    "youTubeId": "W9ObD5d9dKw"
+                },
+                {
+                    "title": "Faith",
+                    "artist": "The Weeknd",
+                    "year": "2020",
+                    "youTubeId": "UtaYneynQ14"
+                },
+                {
+                    "title": "Club Paradise",
+                    "artist": "Drake",
+                    "year": "2011",
+                    "youTubeId": "EfGOqrXcm_Y"
+                },
+                {
+                    "title": "Best Part",
+                    "artist": "Daniel Caesar ft. H.E.R.",
+                    "year": "2017",
+                    "youTubeId": "vBy7FaapGRo"
+                },
+                {
+                    "title": "Die For You",
+                    "artist": "The Weeknd",
+                    "year": "2016",
+                    "youTubeId": "QLCpqdqeoII"
+                },
+                {
+                    "title": "Back 2 Buisness",
+                    "artist": "NAV",
+                    "year": "2020",
+                    "youTubeId": "wrc2TkmzZdU"
+                },
+                {
+                    "title": "Too Deep to Turn Back",
+                    "artist": "Daniel Caesar",
+                    "year": "2023",
+                    "youTubeId": "L7tYcDqTMMg"
+                },
+                {
+                    "title": "Faithful",
+                    "artist": "Drake ft. Pimp C & dvsn",
+                    "year": "2016",
+                    "youTubeId": "5uDPu3qgJ6o"
+                },
+                {
+                    "title": "Lost Ones",
+                    "artist": "J. Cole",
+                    "year": "2011",
+                    "youTubeId": "ngzC_8zqInk"
+                },
+                {
+                    "title": "Heartbreak Anniversary",
+                    "artist": "Giveon",
+                    "year": "2020",
+                    "youTubeId": "MxOZPj8V1Zo"
+                },
+                {
+                    "title": "Pink + White",
+                    "artist": "Frank Ocean",
+                    "year": "2016",
+                    "youTubeId": "O8cDfnQDikQ"
+                }
+            ]
+        },
+        {
+            "_id": "6933ae9cce24326a9e25fb13",
+            "owner": "6933ae9cce24326a9e25fb43",
+            "ownerEmail": "arsh@doe.com",
+            "ownerName": "",
+            "name": "R&B Essentials",
+            "listenerCount": 3,
+            "songs": [
+                {
+                    "title": "We Find Love",
+                    "artist": "Daniel Caesar",
+                    "year": "2017",
+                    "youTubeId": "eBvKXGz0FPo"
+                },
+                {
+                    "title": "Blinding Lights",
+                    "artist": "The Weeknd",
+                    "year": "2020",
+                    "youTubeId": "4NRXx6U8ABQ"
+                },
+                {
+                    "title": "Get You",
+                    "artist": "Daniel Caesar ft. Kali Uchis",
+                    "year": "2016",
+                    "youTubeId": "upm1P6nPWy4"
+                },
+                {
+                    "title": "Lost In Japan",
+                    "artist": "Shawn Mendes",
+                    "year": "2018",
+                    "youTubeId": "xD7x7Gx0y3I"
+                },
+                {
+                    "title": "Come and See Me",
+                    "artist": "PARTYNEXTDOOR ft. Drake",
+                    "year": "2016",
+                    "youTubeId": "1K9Oa4fFZLQ"
+                },
+                {
+                    "title": "Some Way",
+                    "artist": "NAV",
+                    "year": "2017",
+                    "youTubeId": "nnJ_h2hRpoI"
+                },
+                {
+                    "title": "Often",
+                    "artist": "The Weeknd",
+                    "year": "2014",
+                    "youTubeId": "JPIhUaONiLU"
+                },
+                {
+                    "title": "Gravity",
+                    "artist": "Brent Faiyaz ft. Tyler, The Creator",
+                    "year": "2021",
+                    "youTubeId": "Pp-pElPOeyA"
+                },
+                {
+                    "title": "Just Friends",
+                    "artist": "Musiq Soulchild",
+                    "year": "2000",
+                    "youTubeId": "iWJgJ3j58_I"
+                },
+                {
+                    "title": "Let Me Know",
+                    "artist": "Brent Faiyaz",
+                    "year": "2017",
+                    "youTubeId": "38XSLJ9LUxk"
+                },
+                {
+                    "title": "Hold On, We're Going Home",
+                    "artist": "Drake ft. Majid Jordan",
+                    "year": "2013",
+                    "youTubeId": "GxgqpCdOKak"
+                },
+                {
+                    "title": "Get You Good",
+                    "artist": "Roy Woods",
+                    "year": "2015",
+                    "youTubeId": "1CTy-Fcb5bg"
+                },
+                {
+                    "title": "Heartbreak Anniversary",
+                    "artist": "Giveon",
+                    "year": "2020",
+                    "youTubeId": "MxOZPj8V1Zo"
+                },
+                {
+                    "title": "Love Yourz",
+                    "artist": "J. Cole",
+                    "year": "2014",
+                    "youTubeId": "6tjlU4w4fSo"
+                },
+                {
+                    "title": "Find Your Love",
+                    "artist": "Drake",
+                    "year": "2010",
+                    "youTubeId": "pZ12_E5R3qc"
+                },
+                {
+                    "title": "Lost Without U",
+                    "artist": "Robin Thicke",
+                    "year": "2006",
+                    "youTubeId": "tR-Y4xkJhVc"
+                },
+                {
+                    "title": "Confident",
+                    "artist": "Justin Bieber ft. Chance The Rapper",
+                    "year": "2013",
+                    "youTubeId": "50VNCymT-Cs"
+                },
+                {
+                    "title": "Let Me Go",
+                    "artist": "Daniel Caesar",
+                    "year": "2023",
+                    "youTubeId": "JvrVT2VGcvg"
+                },
+                {
+                    "title": "Snooze",
+                    "artist": "SZA",
+                    "year": "2022",
+                    "youTubeId": "kPBTXk1HNXs"
+                },
+                {
+                    "title": "Earned It",
+                    "artist": "The Weeknd",
+                    "year": "2015",
+                    "youTubeId": "waU75jdUnYw"
+                }
+            ]
+        },
+        {
+            "_id": "6933ae9cce24326a9e25fb29",
+            "owner": "6933ae9cce24326a9e25fb43",
+            "ownerEmail": "arsh@doe.com",
+            "ownerName": "",
+            "name": "Late Night Drive",
+            "listenerCount": 17,
+            "songs": [
+                {
+                    "title": "Jungle",
+                    "artist": "Drake",
+                    "year": "2015",
+                    "youTubeId": "AfRdRXCo3IU"
+                },
+                {
+                    "title": "NAV",
+                    "artist": "NAV",
+                    "year": "2017",
+                    "youTubeId": "qz_E3uidr_w"
+                },
+                {
+                    "title": "Wasting Time",
+                    "artist": "Brent Faiyaz ft. Drake",
+                    "year": "2021",
+                    "youTubeId": "NdSH2h-lkYI"
+                },
+                {
+                    "title": "Controla",
+                    "artist": "Drake",
+                    "year": "2016",
+                    "youTubeId": "qs50R_rRoJM"
+                },
+                {
+                    "title": "Wait For U",
+                    "artist": "Future ft. Drake & Tems",
+                    "year": "2022",
+                    "youTubeId": "Y2QpQP8wPG8"
+                },
+                {
+                    "title": "Call Out My Name",
+                    "artist": "The Weeknd",
+                    "year": "2018",
+                    "youTubeId": "rsEne1ZiQrk"
+                },
+                {
+                    "title": "Peach",
+                    "artist": "Kevin Abstract",
+                    "year": "2019",
+                    "youTubeId": "9XkJwcW3nDs"
+                },
+                {
+                    "title": "Shot For Me",
+                    "artist": "Drake",
+                    "year": "2011",
+                    "youTubeId": "wc7JPaRV5uU"
+                },
+                {
+                    "title": "Outta Time",
+                    "artist": "Bryson Tiller ft. Drake",
+                    "year": "2020",
+                    "youTubeId": "ebkurI0ij7Q"
+                },
+                {
+                    "title": "Do Not Disturb",
+                    "artist": "Drake",
+                    "year": "2017",
+                    "youTubeId": "CXXVY4h5iGI"
+                },
+                {
+                    "title": "Loose",
+                    "artist": "Daniel Caesar",
+                    "year": "2017",
+                    "youTubeId": "Eakt1tkxIXc"
+                },
+                {
+                    "title": "Crew",
+                    "artist": "GoldLink ft. Brent Faiyaz & Shy Glizzy",
+                    "year": "2017",
+                    "youTubeId": "nhNqbe6QENY"
+                },
+                {
+                    "title": "305 To My City",
+                    "artist": "Drake ft. Detail",
+                    "year": "2013",
+                    "youTubeId": "ceC1KsXV_jU"
+                },
+                {
+                    "title": "Search & Rescue",
+                    "artist": "Drake",
+                    "year": "2023",
+                    "youTubeId": "ee2MTcUwas8"
+                },
+                {
+                    "title": "NAV - Myself",
+                    "artist": "NAV",
+                    "year": "2017",
+                    "youTubeId": "sB46GqPpVdQ"
+                },
+                {
+                    "title": "Gravity",
+                    "artist": "Brent Faiyaz ft. Tyler, The Creator",
+                    "year": "2021",
+                    "youTubeId": "Pp-pElPOeyA"
+                },
+                {
+                    "title": "Cyanide",
+                    "artist": "Daniel Caesar",
+                    "year": "2019",
+                    "youTubeId": "Jnm3ukzmJe4"
+                },
+                {
+                    "title": "Out Of Time",
+                    "artist": "The Weeknd",
+                    "year": "2022",
+                    "youTubeId": "2fDzCWNS3ig"
+                },
+                {
+                    "title": "Chicago Freestyle",
+                    "artist": "Drake ft. Giveon",
+                    "year": "2020",
+                    "youTubeId": "qHNcZ-nCOJo"
+                },
+                {
+                    "title": "No Idea",
+                    "artist": "Don Toliver",
+                    "year": "2019",
+                    "youTubeId": "ZkJHEUKtvXI"
                 }
             ]
         }
