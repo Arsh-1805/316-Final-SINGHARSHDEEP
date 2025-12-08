@@ -33,7 +33,8 @@ export const GlobalStoreActionType = {
     SET_PLAYER_OVERLAY: "SET_PLAYER_OVERLAY",
     SET_PLAYER_SONG: "SET_PLAYER_SONG",
     CLOSE_PLAYER_OVERLAY: "CLOSE_PLAYER_OVERLAY",
-    MARK_PLAYLIST_ACCESSED: "MARK_PLAYLIST_ACCESSED"
+    MARK_PLAYLIST_ACCESSED: "MARK_PLAYLIST_ACCESSED",
+    SET_PLAYER_REPEAT: "SET_PLAYER_REPEAT"
 }
 
 const tps = new jsTPS();
@@ -108,6 +109,7 @@ function GlobalStoreContextProvider(props) {
         playerOverlayActive: false,
         playerPlaylist: null,
         playerSongIndex: 0,
+        playerRepeat: false,
         recentPlaylists: []
     });
     const history = useHistory();
@@ -268,7 +270,8 @@ function GlobalStoreContextProvider(props) {
                         ...prevStore,
                         playerOverlayActive: true,
                         playerPlaylist: payload.playlist,
-                        playerSongIndex: payload.songIndex ?? 0
+                        playerSongIndex: payload.songIndex ?? 0,
+                        playerRepeat: false
                     };
                 }
                 case GlobalStoreActionType.SET_PLAYER_SONG: {
@@ -282,7 +285,14 @@ function GlobalStoreContextProvider(props) {
                         ...prevStore,
                         playerOverlayActive: false,
                         playerPlaylist: null,
-                        playerSongIndex: 0
+                        playerSongIndex: 0,
+                        playerRepeat: false
+                    };
+                }
+                case GlobalStoreActionType.SET_PLAYER_REPEAT: {
+                    return {
+                        ...prevStore,
+                        playerRepeat: payload
                     };
                 }
                 default:
@@ -547,6 +557,13 @@ store.createNewList = async function () {
         });
     }
 
+    store.togglePlayerRepeat = function() {
+        storeReducer({
+            type: GlobalStoreActionType.SET_PLAYER_REPEAT,
+            payload: !store.playerRepeat
+        });
+    }
+
     store.selectPlayerSong = function(index) {
         storeReducer({
             type: GlobalStoreActionType.SET_PLAYER_SONG,
@@ -554,17 +571,45 @@ store.createNewList = async function () {
         });
     }
 
-    store.playNextSong = function() {
+    store.playNextSong = function(options = {}) {
+        const { wrap = true } = options;
         if (!store.playerPlaylist || store.playerPlaylist.songs.length === 0) return;
-        const nextIndex = (store.playerSongIndex + 1) % store.playerPlaylist.songs.length;
+        const length = store.playerPlaylist.songs.length;
+        let nextIndex = store.playerSongIndex + 1;
+        if (nextIndex >= length) {
+            if (!wrap) {
+                return;
+            }
+            nextIndex = 0;
+        }
         store.selectPlayerSong(nextIndex);
     }
 
-    store.playPreviousSong = function() {
+    store.playPreviousSong = function(options = {}) {
+        const { wrap = true } = options;
         if (!store.playerPlaylist || store.playerPlaylist.songs.length === 0) return;
         const length = store.playerPlaylist.songs.length;
-        const prevIndex = (store.playerSongIndex - 1 + length) % length;
+        let prevIndex = store.playerSongIndex - 1;
+        if (prevIndex < 0) {
+            if (!wrap) {
+                return;
+            }
+            prevIndex = length - 1;
+        }
         store.selectPlayerSong(prevIndex);
+    }
+
+    store.handleSongFinished = function() {
+        if (!store.playerPlaylist || store.playerPlaylist.songs.length === 0) return;
+        const lastIndex = store.playerPlaylist.songs.length - 1;
+        const atLastSong = store.playerSongIndex >= lastIndex;
+        if (!atLastSong) {
+            store.playNextSong({ wrap: false });
+            return;
+        }
+        if (store.playerRepeat) {
+            store.selectPlayerSong(0);
+        }
     }
 
     store.playPlaylist = function (id) {

@@ -9,6 +9,8 @@ import Button from '@mui/material/Button';
 import Avatar from '@mui/material/Avatar';
 import IconButton from '@mui/material/IconButton';
 import Stack from '@mui/material/Stack';
+import Checkbox from '@mui/material/Checkbox';
+import FormControlLabel from '@mui/material/FormControlLabel';
 import SkipPreviousIcon from '@mui/icons-material/SkipPrevious';
 import SkipNextIcon from '@mui/icons-material/SkipNext';
 import PlayArrowIcon from '@mui/icons-material/PlayArrow';
@@ -66,7 +68,7 @@ const PlayPlaylistOverlay = () => {
                     },
                     onStateChange: (event) => {
                         if (event.data === window.YT.PlayerState.ENDED) {
-                            store.playNextSong();
+                            store.handleSongFinished();
                         }
                         else if (event.data === window.YT.PlayerState.PAUSED) {
                             setIsPaused(true);
@@ -222,7 +224,17 @@ const PlayPlaylistOverlay = () => {
                         </IconButton>
                     </Box>
 
-                    <Box sx={{ display: 'flex', justifyContent: 'flex-end' }}>
+                    <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+                        <FormControlLabel
+                            control={
+                                <Checkbox
+                                    checked={store.playerRepeat}
+                                    onChange={store.togglePlayerRepeat}
+                                    color="secondary"
+                                />
+                            }
+                            label="Repeat playlist"
+                        />
                         <Button variant="contained" color="success" onClick={handleClose}>
                             Close
                         </Button>
