@@ -8,6 +8,7 @@ dotenv.config({ path: path.join(__dirname, ".env") });
 
 const MongoDatabaseManager = require("./db/mongodb");
 const PostgresDatabaseManager = require("./db/postgresql");
+const seedDevData = require("./scripts/seedDevData");
 
 const authRouter = require("./routes/auth-router");
 const playlistRouter = require("./routes/playlist-router");
@@ -34,6 +35,7 @@ const PORT = process.env.PORT || 4000;
 async function start() {
   const manager = (process.env.DB_MANAGER || "mongo").toLowerCase();
   let db;
+  let shouldSeed = false;
 
   if (manager === "postgres" || manager === "postgresql") {
     console.log("Using PostgreSQL DatabaseManager");
@@ -41,10 +43,14 @@ async function start() {
   } else {
     console.log("Using MongoDB DatabaseManager");
     db = new MongoDatabaseManager();
+    shouldSeed = true;
   }
 
   try {
     await db.connect();
+    if (shouldSeed) {
+      await seedDevData();
+    }
     app.set("db", db);
 
     app.listen(PORT, () => {
