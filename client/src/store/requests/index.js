@@ -59,6 +59,17 @@ const apis = {
     fetchJSON(`${API_BASE}/playlist/${id}/listen`, {
       method: "POST",
     }),
+
+  getSongStats: () =>
+    fetchJSON(`${API_BASE}/songs/stats`, {
+      method: "GET",
+    }),
+
+  incrementSongListen: ({ title, artist, year }) =>
+    fetchJSON(`${API_BASE}/songs/listen`, {
+      method: "POST",
+      body: JSON.stringify({ title, artist, year }),
+    }),
 };
 
 export default apis;

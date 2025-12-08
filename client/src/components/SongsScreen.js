@@ -425,7 +425,7 @@ const SongsScreen = () => {
                         }}
                     >
                         <Typography variant="subtitle1" sx={{ fontWeight: 'bold', color: '#6a1b9a' }}>
-                            Preview
+                            Song
                         </Typography>
                         {previewVideoId ? (
                             <Box

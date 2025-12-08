@@ -15,5 +15,7 @@ router.post('/playlist', StoreController.createPlaylist);
 router.put('/playlist/:id', StoreController.updatePlaylist);
 router.delete('/playlist/:id', StoreController.deletePlaylist);
 router.post('/playlist/:id/listen', StoreController.incrementPlaylistListeners);
+router.get('/songs/stats', StoreController.getSongStats);
+router.post('/songs/listen', StoreController.incrementSongListen);
 
 module.exports = router;

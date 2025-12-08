@@ -1,6 +1,15 @@
 const Playlist = require('../models/playlist-model');
 const User = require('../models/user-model');
+const SongStat = require('../models/song-stats-model');
 const auth = require('../auth');
+
+const normalizeSongField = (value) => (value ?? '').toString().trim();
+const buildSongKey = (song = {}) => {
+    const title = normalizeSongField(song.title).toLowerCase();
+    const artist = normalizeSongField(song.artist).toLowerCase();
+    const year = normalizeSongField(song.year).toLowerCase();
+    return `${title}||${artist}||${year}`;
+};
 
 async function createPlaylist(req, res) {
     try {
@@ -247,11 +256,59 @@ async function incrementPlaylistListeners(req, res) {
     }
 }
 
+async function incrementSongListen(req, res) {
+    try {
+        const body = req.body || {};
+        const title = normalizeSongField(body.title);
+        const artist = normalizeSongField(body.artist);
+        const year = normalizeSongField(body.year);
+
+        if (!title || !artist || !year) {
+            return res.status(400).json({ success: false, errorMessage: 'Missing song data' });
+        }
+
+        const key = buildSongKey({ title, artist, year });
+        let stat = await SongStat.findOne({ key });
+        if (!stat) {
+            stat = new SongStat({
+                key,
+                title,
+                artist,
+                year,
+                listenCount: 0
+            });
+        } else {
+            stat.title = title;
+            stat.artist = artist;
+            stat.year = year;
+        }
+        stat.listenCount = (stat.listenCount || 0) + 1;
+        await stat.save();
+
+        return res.status(200).json({ success: true, listenCount: stat.listenCount });
+    } catch (err) {
+        console.warn('incrementSongListen error:', err);
+        return res.status(500).json({ success: false, errorMessage: 'Could not update song listens' });
+    }
+}
+
+async function getSongStats(req, res) {
+    try {
+        const stats = await SongStat.find({}).sort({ listenCount: -1 });
+        return res.status(200).json({ success: true, stats });
+    } catch (err) {
+        console.warn('getSongStats error:', err);
+        return res.status(500).json({ success: false, errorMessage: 'Could not load song stats' });
+    }
+}
+
 module.exports = {
     createPlaylist,
     getPlaylistById,
     getPlaylistPairs,
     updatePlaylist,
     deletePlaylist,
-    incrementPlaylistListeners
+    incrementPlaylistListeners,
+    incrementSongListen,
+    getSongStats
 };
