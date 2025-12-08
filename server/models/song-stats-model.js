@@ -12,4 +12,4 @@ const SongStatSchema = new Schema(
     { timestamps: true }
 );
 
-module.exports = mongoose.model('SongStat', SongStatSchema);
+module.exports = mongoose.models.SongStat || mongoose.model('SongStat', SongStatSchema);

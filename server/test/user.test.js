@@ -4,19 +4,12 @@ import path from 'path';
 import dotenv from 'dotenv';
 import { describe, it, expect, beforeAll, afterAll, beforeEach } from 'vitest';
 import User from '../models/user-model.js';
+import { initTestMongo, shutdownTestMongo } from './utils/mongo-memory.js';
 
 dotenv.config({ path: path.join(process.cwd(), '.env') });
 
-const ensureTestUri = () => {
-    const uri = process.env.DB_CONNECT_TEST;
-    if (!uri) {
-        throw new Error('DB_CONNECT_TEST missing from environment.');
-    }
-    return uri;
-};
-
 beforeAll(async () => {
-    const uri = ensureTestUri();
+    const uri = await initTestMongo();
     await mongoose.connect(uri, {
         useNewUrlParser: true,
         useUnifiedTopology: true
@@ -28,6 +21,7 @@ afterAll(async () => {
         await mongoose.connection.dropDatabase();
         await mongoose.connection.close();
     }
+    await shutdownTestMongo();
 });
 
 beforeEach(async () => {

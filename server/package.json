@@ -20,5 +20,8 @@
     "pg-hstore": "^2.3.4",
     "sequelize": "^6.37.7",
     "vitest": "^3.2.4"
+  },
+  "devDependencies": {
+    "mongodb-memory-server": "^10.4.1"
   }
 }

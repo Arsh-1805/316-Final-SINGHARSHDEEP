@@ -1,0 +1,195 @@
+{
+  "info": {
+    "_postman_id": "a9d0aedd-7bf5-4f2c-8be7-8fbcf5c3b154",
+    "name": "Playlister API Tests",
+    "schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json"
+  },
+  "item": [
+    {
+      "name": "Playlist Pairs",
+      "event": [
+        {
+          "listen": "test",
+          "script": {
+            "type": "text/javascript",
+            "exec": [
+              "pm.test('returns 200', function () {",
+              "    pm.response.to.have.status(200);",
+              "});",
+              "const jsonData = pm.response.json();",
+              "pm.test('success flag true', function () {",
+              "    pm.expect(jsonData.success).to.be.true;",
+              "});",
+              "pm.test('idNamePairs array present', function () {",
+              "    pm.expect(jsonData.idNamePairs).to.be.an('array');",
+              "});"
+            ]
+          }
+        }
+      ],
+      "request": {
+        "method": "GET",
+        "header": [
+          {
+            "key": "Accept",
+            "value": "application/json"
+          }
+        ],
+        "url": {
+          "raw": "{{baseUrl}}/api/playlistpairs",
+          "host": [
+            "{{baseUrl}}"
+          ],
+          "path": [
+            "api",
+            "playlistpairs"
+          ]
+        }
+      }
+    },
+    {
+      "name": "Songs - Record Listen (valid)",
+      "event": [
+        {
+          "listen": "test",
+          "script": {
+            "type": "text/javascript",
+            "exec": [
+              "pm.test('returns 200', function () {",
+              "    pm.response.to.have.status(200);",
+              "});",
+              "const jsonData = pm.response.json();",
+              "pm.test('success true', function () {",
+              "    pm.expect(jsonData.success).to.be.true;",
+              "});",
+              "pm.test('listenCount increments', function () {",
+              "    pm.expect(jsonData.listenCount).to.be.a('number');",
+              "    pm.expect(jsonData.listenCount).to.be.above(0);",
+              "});"
+            ]
+          }
+        }
+      ],
+      "request": {
+        "method": "POST",
+        "header": [
+          {
+            "key": "Content-Type",
+            "value": "application/json"
+          }
+        ],
+        "body": {
+          "mode": "raw",
+          "raw": "{\n    \"title\": \"Postman Test Song\",\n    \"artist\": \"Integration Artist\",\n    \"year\": \"2024\"\n}"
+        },
+        "url": {
+          "raw": "{{baseUrl}}/api/songs/listen",
+          "host": [
+            "{{baseUrl}}"
+          ],
+          "path": [
+            "api",
+            "songs",
+            "listen"
+          ]
+        }
+      }
+    },
+    {
+      "name": "Songs - Record Listen (missing fields)",
+      "event": [
+        {
+          "listen": "test",
+          "script": {
+            "type": "text/javascript",
+            "exec": [
+              "pm.test('returns 400 for bad request', function () {",
+              "    pm.response.to.have.status(400);",
+              "});",
+              "const jsonData = pm.response.json();",
+              "pm.test('success false', function () {",
+              "    pm.expect(jsonData.success).to.be.false;",
+              "});",
+              "pm.test('reports error message', function () {",
+              "    pm.expect(jsonData.errorMessage).to.match(/missing song data/i);",
+              "});"
+            ]
+          }
+        }
+      ],
+      "request": {
+        "method": "POST",
+        "header": [
+          {
+            "key": "Content-Type",
+            "value": "application/json"
+          }
+        ],
+        "body": {
+          "mode": "raw",
+          "raw": "{\n    \"title\": \"\",\n    \"artist\": \"Integration Artist\",\n    \"year\": \"\"\n}"
+        },
+        "url": {
+          "raw": "{{baseUrl}}/api/songs/listen",
+          "host": [
+            "{{baseUrl}}"
+          ],
+          "path": [
+            "api",
+            "songs",
+            "listen"
+          ]
+        }
+      }
+    },
+    {
+      "name": "Songs - Fetch Stats",
+      "event": [
+        {
+          "listen": "test",
+          "script": {
+            "type": "text/javascript",
+            "exec": [
+              "pm.test('returns 200', function () {",
+              "    pm.response.to.have.status(200);",
+              "});",
+              "const jsonData = pm.response.json();",
+              "pm.test('success true', function () {",
+              "    pm.expect(jsonData.success).to.be.true;",
+              "});",
+              "pm.test('stats array returned', function () {",
+              "    pm.expect(jsonData.stats).to.be.an('array');",
+              "});"
+            ]
+          }
+        }
+      ],
+      "request": {
+        "method": "GET",
+        "header": [
+          {
+            "key": "Accept",
+            "value": "application/json"
+          }
+        ],
+        "url": {
+          "raw": "{{baseUrl}}/api/songs/stats",
+          "host": [
+            "{{baseUrl}}"
+          ],
+          "path": [
+            "api",
+            "songs",
+            "stats"
+          ]
+        }
+      }
+    }
+  ],
+  "variable": [
+    {
+      "key": "baseUrl",
+      "value": "http://localhost:4000"
+    }
+  ]
+}

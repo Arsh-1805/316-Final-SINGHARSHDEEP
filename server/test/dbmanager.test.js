@@ -1,6 +1,8 @@
 import { describe, it, expect, beforeAll, afterAll } from "vitest";
+import mongoose from "mongoose";
 import dotenv from "dotenv";
 import path from "path";
+import { initTestMongo, shutdownTestMongo } from "./utils/mongo-memory.js";
 
 dotenv.config({ path: path.join(process.cwd(), ".env") });
 
@@ -11,6 +13,7 @@ let db;
 
 describe("DatabaseManager unified tests", () => {
   beforeAll(async () => {
+    await initTestMongo();
     const manager = (process.env.DB_MANAGER || "mongo").toLowerCase();
     if (manager === "postgres" || manager === "postgresql") {
       db = new PostgresDatabaseManager();
@@ -24,13 +27,17 @@ describe("DatabaseManager unified tests", () => {
     if (db && db.disconnect) {
       await db.disconnect();
     }
+    await shutdownTestMongo();
   });
 
   it("creates a playlist for current user", async () => {
     const ownerEmail = "arsh@doe.com";
+    const ownerId = new mongoose.Types.ObjectId();
 
     const playlist = await db.createPlaylist({
       name: "Test From Vitest",
+      owner: ownerId,
+      ownerName: "Vitest User",
       ownerEmail,
       songs: [],
     });
